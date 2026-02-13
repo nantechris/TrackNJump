@@ -1,0 +1,25 @@
+/*
+ * Styles globaux de l'application TrackNJump.
+ *
+ * Ce fichier contient les styles qui s'appliquent à l'ensemble de l'application,
+ * en complément des variables de thème définies dans theme/variables.scss.
+ *
+ * Les composants Ionic importent automatiquement leurs propres styles de base.
+ * Ici, on importe les styles "core" et les styles spécifiques à la plateforme.
+ */
+
+/* Import des styles de base Ionic */
+@import "@ionic/angular/css/core.css";
+
+/* CSS de base recommandé par Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Utilitaires optionnels Ionic */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";

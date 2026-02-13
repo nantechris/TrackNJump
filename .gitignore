@@ -1,0 +1,51 @@
+# Dépendances
+node_modules/
+
+# Build output - fichiers générés par la compilation
+www/
+dist/
+.angular/
+out-tsc/
+
+# Environnements Capacitor (générés par `cap add android/ios`)
+android/
+ios/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Éditeurs et IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+.sublime-workspace
+*.sublime-project
+
+# Système d'exploitation
+.DS_Store
+Thumbs.db
+
+# Tests
+coverage/
+.nyc_output/
+
+# Variables d'environnement
+.env
+.env.local
+.env.*.local
+
+# Fichiers temporaires
+*.tmp
+*.temp
+.cache/

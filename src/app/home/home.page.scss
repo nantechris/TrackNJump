@@ -1,0 +1,96 @@
+/**
+ * Styles spécifiques à la page d'accueil (HomePage).
+ *
+ * L'application utilise un thème bleu foncé (#13253D) inspiré
+ * du monde équestre, avec des cartes blanches pour chaque cavalier.
+ */
+
+// === EN-TÊTE ===
+
+// Couleur du texte dans l'en-tête (bleu foncé)
+ion-header {
+  * {
+    color: #13253d;
+  }
+
+  // Titre centré en gras avec une taille plus grande que par défaut
+  ion-title {
+    font-size: 1.75em;
+    font-weight: 700;
+    text-align: center;
+  }
+}
+
+// === CONTENU PRINCIPAL ===
+
+ion-content {
+  // Fond bleu foncé pour le contenu principal
+  --ion-background-color: #13253d;
+
+  // Couleur de texte par défaut pour tous les éléments enfants
+  * {
+    color: #13253d;
+  }
+
+  // === BOUTON DE PRÉFÉRENCE MANUELLE (droitier/gaucher) ===
+  // Positionné en bas à droite de l'écran, toujours visible
+  .manual-preference-container {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 15px 10px 5px;
+
+    // Les icônes de main sont en blanc pour contraster avec le fond bleu
+    * {
+      padding-left: 10px;
+      color: #fff;
+    }
+  }
+
+  // === LISTE DES CAVALIERS ===
+  ion-list {
+    // Espacement interne de la liste
+    padding: 8px;
+
+    // Chaque carte de cavalier
+    ion-item {
+      // Marge entre les cartes
+      margin: 20px 10px;
+      // Fond blanc pour les cartes
+      --ion-background-color: #fff;
+      // Coins arrondis pour un look carte (card)
+      border-radius: 10px;
+      // Ombre portée subtile pour l'effet de profondeur
+      box-shadow: 5px 5px 10px -6px rgba(0, 0, 0, 0.75);
+
+      // Layout interne : le label affiche ses enfants en ligne (flexbox)
+      ion-label {
+        display: flex;
+        align-items: center;
+
+        // Numéro de dossard - grand et en gras pour être bien visible
+        .bib {
+          padding: 0 20px 0 10px;
+          font-size: 2rem;
+          font-weight: 700;
+        }
+
+        // Conteneur pour le nom et le cheval, empilés verticalement
+        .textual-container {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+
+          // Nom du cavalier - en gras et légèrement plus grand
+          .name {
+            font-size: 1.25rem;
+            font-weight: 700;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+<!-- En-tête de la page avec le titre de l'application -->
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title> TrackNJump </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<!-- Contenu principal de la page -->
+<ion-content class="flex-container" [fullscreen]="true">
+
+  <!-- Liste des cavaliers avec la fonctionnalité de réordonnancement -->
+  <ion-list>
+    <!--
+      ion-reorder-group : conteneur qui active le drag & drop
+      - [disabled]="false" : le réordonnancement est toujours actif
+      - (ionItemReorder) : événement déclenché quand un élément est déplacé
+    -->
+    <ion-reorder-group [disabled]="false" (ionItemReorder)="handleReorder($event)">
+
+      <!--
+        Boucle sur chaque cavalier de la liste.
+        Chaque item affiche le dossard, le nom et le cheval.
+      -->
+      <ion-item *ngFor="let rider of riders">
+        <ion-label>
+          <!-- Numéro de dossard du cavalier -->
+          <div class="bib">{{ rider.bib }}</div>
+
+          <div class="textual-container">
+            <div class="name">{{ rider.name }}</div>
+            <div class="horse">{{ rider.horse }}</div>
+          </div>
+        </ion-label>
+
+        <!--
+          Poignée de réordonnancement (drag handle).
+          Le [slot] est dynamique selon la préférence de latéralité :
+          - "end" (droite) si rightHanded est true
+          - "start" (gauche) si rightHanded est false
+          L'icône utilisée est un fer à cheval (horseshoe) en accord avec le thème équestre.
+        -->
+        <ion-reorder [slot]="rightHanded ? 'end' : 'start'">
+          <img src="../../assets/icon/horseshoe.svg" alt="horseshoe" />
+        </ion-reorder>
+      </ion-item>
+
+    </ion-reorder-group>
+  </ion-list>
+
+  <!--
+    Bouton flottant en bas à droite pour changer la préférence de latéralité.
+    Affiche l'icône correspondante (main droite ou main gauche)
+    et bascule au clic entre droitier et gaucher.
+  -->
+  <div class="manual-preference-container">
+    <!-- Affiché si l'utilisateur est droitier -->
+    <img
+      *ngIf="rightHanded; else leftHanded"
+      src="../../assets/icon/rightHanded.svg"
+      alt="rightHanded"
+      (click)="changeLiterality()"
+    />
+
+    <!-- Template alternatif : affiché si l'utilisateur est gaucher -->
+    <ng-template #leftHanded>
+      <img
+        src="../../assets/icon/leftHanded.svg"
+        alt="leftHanded"
+        (click)="changeLiterality()"
+      />
+    </ng-template>
+  </div>
+
+</ion-content>
