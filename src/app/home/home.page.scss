@@ -175,6 +175,19 @@ ion-item-options {
     color: #ffffff !important;
   }
 
+  ion-item-option.equal-width-option {
+    width: 50px;
+    max-width: 50px;
+  }
+  // Arrondir le premier bouton sur le côté gauche
+  ion-item-option.equal-width-option:first-child {
+    border-radius: 10px 0 0 10px;
+  }
+
+  // Arrondir le dernier bouton sur le côté droit
+  ion-item-option.equal-width-option:last-child {
+    border-radius: 0 10px 10px 0;
+  }
   ion-item-option[color='danger'] ion-icon {
     color: #ffffff !important;
   }
