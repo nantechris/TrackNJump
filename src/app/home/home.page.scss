@@ -140,3 +140,32 @@ ion-content {
     }
   }
 }
+
+/* Swipe option styles */
+ion-item-options {
+  ion-item-option.status-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: 0.05em;
+    color: #ffffff !important;
+  }
+
+  ion-item-option[color="danger"] ion-icon {
+    color: #ffffff !important;
+  }
+}
+
+/* More robust styling for trash icon (fill/stroke + color) */
+.trash-icon {
+  color: #ffffff !important;
+  --ionicon-stroke: #ffffff !important;
+  --ionicon-fill: #ffffff !important;
+}
+
+ion-item-option[color="danger"] {
+  /* ensure background contrasts with white icon */
+  --background: var(--ion-color-danger, #ff3b30);
+}

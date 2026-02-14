@@ -30,19 +30,17 @@
         
         <!-- Options de swipe à gauche : Marquer comme non-partant ou Supprimer -->
         <ion-item-options side="start">
-          <ion-item-option 
-            [color]="rider.isNonStarter ? 'success' : 'warning'" 
+          <ion-item-option
+            class="status-option"
+            [color]="rider.isNonStarter ? 'success' : 'warning'"
             (click)="toggleNonStarter(rider)">
-            <ion-icon 
-              slot="icon-only" 
-              [name]="rider.isNonStarter ? 'checkmark-circle' : 'remove-circle'">
-            </ion-icon>
+            {{ rider.isNonStarter ? 'P' : 'NP' }}
           </ion-item-option>
         </ion-item-options>
 
         <ion-item-options side="end">
           <ion-item-option color="danger" (click)="deleteRider(rider)">
-            <ion-icon slot="icon-only" name="trash"></ion-icon>
+            <ion-icon slot="icon-only" name="trash" class="trash-icon"></ion-icon>
           </ion-item-option>
         </ion-item-options>
 
