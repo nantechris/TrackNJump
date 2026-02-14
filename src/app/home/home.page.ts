@@ -1,18 +1,6 @@
-import { Component } from '@angular/core';
-import { ItemReorderEventDetail } from '@ionic/angular';
-
-/**
- * Interface représentant un cavalier (rider) dans l'ordre de passage.
- *
- * @property bib - Numéro de dossard du cavalier
- * @property name - Nom du cavalier (modifiable en temps réel via l'input)
- * @property horse - Nom du cheval monté par le cavalier
- */
-interface Rider {
-  bib: number;
-  name: string;
-  horse: string;
-}
+import { Component, OnInit } from '@angular/core';
+import { AlertController, ItemReorderEventDetail } from '@ionic/angular';
+import { RiderService, Rider } from '../services/rider.service';
 
 /**
  * HomePage - Page principale de l'application TrackNJump.
@@ -22,17 +10,19 @@ interface Rider {
  *
  * Fonctionnalités :
  * 1. Affichage de la liste des cavaliers avec leur dossard, nom et cheval
- * 2. Réorganisation par glisser-déposer (drag & drop) via ion-reorder
- * 3. Édition inline du nom des cavaliers
- * 4. Choix de la position de la poignée de réordonnancement (droitier/gaucher)
- *    pour faciliter l'utilisation d'une seule main
+ * 2. Ajout d'un cavalier engagé terrain
+ * 3. Modification rapide du dossard, nom et cheval
+ * 4. Suppression d'un cavalier par swipe
+ * 5. Marquage d'un cavalier comme non-partant (déplacé en fin de liste)
+ * 6. Réorganisation par glisser-déposer (drag & drop)
+ * 7. Persistance des données sur Android/iOS via @ionic/storage-angular
  */
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
-export class HomePage {
+export class HomePage implements OnInit {
   /**
    * Indique si l'utilisateur est droitier (true) ou gaucher (false).
    * Détermine de quel côté apparaît la poignée de réordonnancement :
@@ -43,30 +33,118 @@ export class HomePage {
 
   /**
    * Liste des cavaliers dans l'ordre de passage.
-   * Chaque cavalier possède un dossard (bib), un nom (name) et un cheval (horse).
-   *
-   * Les données sont initialisées avec des cavaliers célèbres du saut d'obstacles :
-   * - Christian Ahlmann (Dominator 2000 Z)
-   * - Edwina Tops Alexander (Itot du Chateau)
-   * - Marcus Ehning (Comme Il Faut)
-   * - Judy-Ann Melchior (Levisto Z)
-   *
-   * La liste est répétée 3 fois pour simuler un ordre de passage plus long.
+   * Chargée depuis le stockage local au démarrage de la page.
    */
-  riders: Rider[] = [
-    { bib: 1, name: 'Christian Alhmann', horse: 'Dominator 2000 Z' },
-    { bib: 2, name: 'Edwina Tops Alexander', horse: 'Itot du Chateau' },
-    { bib: 3, name: 'Marcus Ehning', horse: 'Comme Il Faut' },
-    { bib: 4, name: 'Judy-Ann Melchior', horse: 'Levisto Z' },
-    { bib: 1, name: 'Christian Alhmann', horse: 'Dominator 2000 Z' },
-    { bib: 2, name: 'Edwina Tops Alexander', horse: 'Itot du Chateau' },
-    { bib: 3, name: 'Marcus Ehning', horse: 'Comme Il Faut' },
-    { bib: 4, name: 'Judy-Ann Melchior', horse: 'Levisto Z' },
-    { bib: 1, name: 'Christian Alhmann', horse: 'Dominator 2000 Z' },
-    { bib: 2, name: 'Edwina Tops Alexander', horse: 'Itot du Chateau' },
-    { bib: 3, name: 'Marcus Ehning', horse: 'Comme Il Faut' },
-    { bib: 4, name: 'Judy-Ann Melchior', horse: 'Levisto Z' },
-  ];
+  riders: Rider[] = [];
+
+  constructor(
+    private riderService: RiderService,
+    private alertController: AlertController
+  ) {}
+
+  /**
+   * Initialise la page en chargeant les cavaliers depuis le stockage.
+   */
+  async ngOnInit(): Promise<void> {
+    await this.loadRiders();
+  }
+
+  /**
+   * Charge les cavaliers depuis le service de persistance.
+   */
+  async loadRiders(): Promise<void> {
+    this.riders = await this.riderService.getRiders();
+  }
+
+  /**
+   * Affiche une alerte pour ajouter un nouveau cavalier engagé terrain.
+   */
+  async addRider(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Ajouter un cavalier',
+      inputs: [
+        {
+          name: 'bib',
+          type: 'number',
+          placeholder: 'Numéro de dossard',
+          min: 1
+        },
+        {
+          name: 'name',
+          type: 'text',
+          placeholder: 'Nom du cavalier'
+        },
+        {
+          name: 'horse',
+          type: 'text',
+          placeholder: 'Nom du cheval'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Annuler',
+          role: 'cancel'
+        },
+        {
+          text: 'Ajouter',
+          handler: async (data) => {
+            if (data.bib && data.name && data.horse) {
+              await this.riderService.addRider({
+                bib: parseInt(data.bib, 10),
+                name: data.name,
+                horse: data.horse,
+                isNonStarter: false
+              });
+              await this.loadRiders();
+            }
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  /**
+   * Met à jour un cavalier (dossard, nom ou cheval).
+   * @param rider - Le cavalier à mettre à jour
+   * @param field - Le champ modifié ('bib', 'name' ou 'horse')
+   * @param event - L'événement de modification
+   */
+  async updateRider(rider: Rider, field: 'bib' | 'name' | 'horse', event: any): Promise<void> {
+    const value = event.target.value;
+    const updates: any = {};
+    
+    if (field === 'bib') {
+      updates.bib = parseInt(value, 10);
+    } else {
+      updates[field] = value;
+    }
+
+    await this.riderService.updateRider(rider.id, updates);
+  }
+
+  /**
+   * Supprime un cavalier de la liste.
+   * @param rider - Le cavalier à supprimer
+   */
+  async deleteRider(rider: Rider): Promise<void> {
+    await this.riderService.deleteRider(rider.id);
+    await this.loadRiders();
+  }
+
+  /**
+   * Marque un cavalier comme non-partant et le déplace en fin de liste.
+   * @param rider - Le cavalier à marquer
+   */
+  async toggleNonStarter(rider: Rider): Promise<void> {
+    if (rider.isNonStarter) {
+      await this.riderService.markAsStarter(rider.id);
+    } else {
+      await this.riderService.markAsNonStarter(rider.id);
+    }
+    await this.loadRiders();
+  }
 
   /**
    * Bascule la préférence de latéralité (droitier ↔ gaucher).
@@ -82,13 +160,16 @@ export class HomePage {
    *
    * Lorsque l'utilisateur glisse un élément pour le déplacer,
    * l'événement `ionItemReorder` est déclenché.
-   * L'appel à `event.detail.complete()` finalise le réordonnancement
-   * en appliquant le déplacement au DOM.
+   * L'appel à `event.detail.complete(this.riders)` finalise le réordonnancement
+   * et met à jour le tableau.
    *
    * @param event - L'événement de réordonnancement Ionic contenant
    *                les indices source (from) et destination (to)
    */
-  handleReorder(event: CustomEvent<ItemReorderEventDetail>): void {
-    event.detail.complete();
+  async handleReorder(event: CustomEvent<ItemReorderEventDetail>): Promise<void> {
+    // Complete retourne le nouveau tableau réordonné
+    this.riders = event.detail.complete(this.riders);
+    // Sauvegarde le nouvel ordre
+    await this.riderService.reorderRiders(this.riders);
   }
 }

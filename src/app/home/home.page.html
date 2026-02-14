@@ -1,7 +1,12 @@
-<!-- En-tête de la page avec le titre de l'application -->
+<!-- En-tête de la page avec le titre de l'application et bouton d'ajout -->
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title> TrackNJump </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="addRider()">
+        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -19,30 +24,75 @@
 
       <!--
         Boucle sur chaque cavalier de la liste.
-        Chaque item affiche le dossard, le nom et le cheval.
+        ion-item-sliding permet le swipe pour supprimer.
       -->
-      <ion-item *ngFor="let rider of riders">
-        <ion-label>
-          <!-- Numéro de dossard du cavalier -->
-          <div class="bib">{{ rider.bib }}</div>
+      <ion-item-sliding *ngFor="let rider of riders">
+        
+        <!-- Options de swipe à gauche : Marquer comme non-partant ou Supprimer -->
+        <ion-item-options side="start">
+          <ion-item-option 
+            [color]="rider.isNonStarter ? 'success' : 'warning'" 
+            (click)="toggleNonStarter(rider)">
+            <ion-icon 
+              slot="icon-only" 
+              [name]="rider.isNonStarter ? 'checkmark-circle' : 'remove-circle'">
+            </ion-icon>
+          </ion-item-option>
+        </ion-item-options>
 
-          <div class="textual-container">
-            <div class="name">{{ rider.name }}</div>
-            <div class="horse">{{ rider.horse }}</div>
-          </div>
-        </ion-label>
+        <ion-item-options side="end">
+          <ion-item-option color="danger" (click)="deleteRider(rider)">
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
 
-        <!--
-          Poignée de réordonnancement (drag handle).
-          Le [slot] est dynamique selon la préférence de latéralité :
-          - "end" (droite) si rightHanded est true
-          - "start" (gauche) si rightHanded est false
-          L'icône utilisée est un fer à cheval (horseshoe) en accord avec le thème équestre.
-        -->
-        <ion-reorder [slot]="rightHanded ? 'end' : 'start'">
-          <img src="../../assets/icon/horseshoe.svg" alt="horseshoe" />
-        </ion-reorder>
-      </ion-item>
+        <!-- Contenu de l'item avec édition inline -->
+        <ion-item [class.non-starter]="rider.isNonStarter">
+          <ion-label>
+            <!-- Numéro de dossard du cavalier (éditable) -->
+            <div class="bib-container">
+              <input 
+                type="number" 
+                class="bib" 
+                [value]="rider.bib"
+                (blur)="updateRider(rider, 'bib', $event)"
+                min="1"
+              />
+            </div>
+
+            <div class="textual-container">
+              <!-- Nom du cavalier (éditable) -->
+              <input 
+                type="text" 
+                class="name" 
+                [value]="rider.name"
+                (blur)="updateRider(rider, 'name', $event)"
+                placeholder="Nom du cavalier"
+              />
+              <!-- Nom du cheval (éditable) -->
+              <input 
+                type="text" 
+                class="horse" 
+                [value]="rider.horse"
+                (blur)="updateRider(rider, 'horse', $event)"
+                placeholder="Nom du cheval"
+              />
+            </div>
+          </ion-label>
+
+          <!--
+            Poignée de réordonnancement (drag handle).
+            Le [slot] est dynamique selon la préférence de latéralité :
+            - "end" (droite) si rightHanded est true
+            - "start" (gauche) si rightHanded est false
+            L'icône utilisée est un fer à cheval (horseshoe) en accord avec le thème équestre.
+          -->
+          <ion-reorder [slot]="rightHanded ? 'end' : 'start'">
+            <img src="../../assets/icon/horseshoe.svg" alt="horseshoe" />
+          </ion-reorder>
+        </ion-item>
+
+      </ion-item-sliding>
 
     </ion-reorder-group>
   </ion-list>

@@ -66,16 +66,41 @@ ion-content {
       // Ombre portée subtile pour l'effet de profondeur
       box-shadow: 5px 5px 10px -6px rgba(0, 0, 0, 0.75);
 
+      // Style pour les cavaliers non-partants
+      &.non-starter {
+        opacity: 0.5;
+        background-color: #f4f4f4;
+        
+        ion-label {
+          text-decoration: line-through;
+        }
+      }
+
       // Layout interne : le label affiche ses enfants en ligne (flexbox)
       ion-label {
         display: flex;
         align-items: center;
 
+        // Conteneur du numéro de dossard
+        .bib-container {
+          padding: 0 20px 0 10px;
+        }
+
         // Numéro de dossard - grand et en gras pour être bien visible
         .bib {
-          padding: 0 20px 0 10px;
           font-size: 2rem;
           font-weight: 700;
+          border: none;
+          background: transparent;
+          width: 60px;
+          text-align: center;
+          color: #13253d;
+          
+          &:focus {
+            outline: none;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+          }
         }
 
         // Conteneur pour le nom et le cheval, empilés verticalement
@@ -83,11 +108,32 @@ ion-content {
           display: flex;
           flex-direction: column;
           gap: 5px;
+          flex: 1;
+
+          // Styles communs pour les inputs de nom et cheval
+          input {
+            border: none;
+            background: transparent;
+            color: #13253d;
+            width: 100%;
+            
+            &:focus {
+              outline: none;
+              background-color: #f0f0f0;
+              border-radius: 5px;
+              padding: 2px 5px;
+            }
+          }
 
           // Nom du cavalier - en gras et légèrement plus grand
           .name {
             font-size: 1.25rem;
             font-weight: 700;
+          }
+          
+          // Nom du cheval
+          .horse {
+            font-size: 1rem;
           }
         }
       }
