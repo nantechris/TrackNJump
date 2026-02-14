@@ -1,6 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController, ItemReorderEventDetail } from '@ionic/angular';
+import {
+  AlertController,
+  ItemReorderEventDetail,
+  ModalController,
+} from '@ionic/angular';
 import { Rider, RiderService } from '../services/rider.service';
+import {
+  ImportEpreuveComponent,
+  ImportResult,
+} from './import-epreuve/import-epreuve.component';
 
 /**
  * HomePage - Page principale de l'application TrackNJump.
@@ -40,6 +48,7 @@ export class HomePage implements OnInit {
   constructor(
     private riderService: RiderService,
     private alertController: AlertController,
+    private modalController: ModalController,
   ) {}
 
   /**
@@ -107,101 +116,54 @@ export class HomePage implements OnInit {
   }
 
   /**
-   * Affiche une alerte pour importer une liste de cavaliers depuis un TSV.
-   * Format attendu : Dossard\tCavalier\tClub engageur\tÉquidé\tCoach
+   * Ouvre le modal d'import de cavaliers depuis un TSV FFE.
    */
   async importRiders(): Promise<void> {
-    const alert = await this.alertController.create({
-      header: 'Importer des cavaliers',
-      message: "Collez les données TSV de la FFE (incluant l'entête)",
-      inputs: [
-        {
-          name: 'tsvData',
-          type: 'textarea',
-          placeholder:
-            'Dossard\tCavalier\tClub engageur\tÉquidé\tCoach\n1\tChristian Ahlmann\t...',
-        },
-      ],
-      buttons: [
-        {
-          text: 'Annuler',
-          role: 'cancel',
-        },
-        {
-          text: 'Importer',
-          handler: async (data) => {
-            if (data.tsvData) {
-              await this.parseTsvAndImport(data.tsvData);
-              await this.loadRiders();
-            }
-          },
-        },
-      ],
+    const modal = await this.modalController.create({
+      component: ImportEpreuveComponent,
     });
 
-    await alert.present();
-  }
+    await modal.present();
 
-  /**
-   * Parse les données TSV et importe les cavaliers.
-   * @param tsvData - Données TSV copiées-collées
-   */
-  private async parseTsvAndImport(tsvData: string): Promise<void> {
-    const lines = tsvData.trim().split('\n');
-    const ridersToAdd: Omit<Rider, 'id'>[] = [];
-
-    // Ignorer la première ligne (entête)
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      const columns = line.split('\t');
-
-      // Format: Dossard\tCavalier\tClub engageur\tÉquidé\tCoach
-      if (columns.length >= 4) {
-        const bib = parseInt(columns[0], 10);
-        const name = columns[1].trim();
-        const horse = columns[3].trim();
-
-        if (!isNaN(bib) && name && horse) {
-          ridersToAdd.push({
-            bib,
-            name,
-            horse,
-            isNonStarter: false,
-            hasPassed: false,
-          });
+    const { data } = await modal.onDidDismiss<ImportResult>();
+    if (data) {
+      if (data.mode === 'replace') {
+        await this.riderService.replaceAllRiders(data.riders);
+      } else {
+        for (const rider of data.riders) {
+          await this.riderService.addRider(rider);
         }
       }
-    }
-
-    // Ajouter tous les cavaliers en une seule fois
-    for (const rider of ridersToAdd) {
-      await this.riderService.addRider(rider);
+      await this.loadRiders();
     }
   }
 
   /**
    * Met à jour un cavalier (dossard, nom ou cheval).
-   * @param rider - Le cavalier à mettre à jour
-   * @param field - Le champ modifié ('bib', 'name' ou 'horse')
-   * @param event - L'événement de modification
+   * Appelé par le composant rider-card.
    */
-  async updateRider(
-    rider: Rider,
-    field: 'bib' | 'name' | 'horse',
-    event: any,
-  ): Promise<void> {
-    const value = event.target.value;
+  async onRiderUpdated(data: {
+    rider: Rider;
+    field: 'bib' | 'name' | 'horse';
+    event: any;
+  }): Promise<void> {
+    const value = data.event.target.value;
     const updates: any = {};
 
-    if (field === 'bib') {
+    if (data.field === 'bib') {
       updates.bib = parseInt(value, 10);
     } else {
-      updates[field] = value;
+      updates[data.field] = value;
     }
 
-    await this.riderService.updateRider(rider.id, updates);
+    await this.riderService.updateRider(data.rider.id, updates);
+  }
+
+  /**
+   * TrackBy pour optimiser le rendu de la liste.
+   */
+  trackByRiderId(index: number, rider: Rider): string {
+    return rider.id;
   }
 
   /**

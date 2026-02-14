@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Importer une épreuve</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Zone de saisie TSV -->
+  <div class="import-section">
+    <ion-label class="section-label">
+      Collez les données copiées depuis la FFE
+    </ion-label>
+    <textarea
+      class="tsv-input"
+      [(ngModel)]="tsvData"
+      placeholder="Dossard&#9;Cavalier&#9;Club engageur&#9;Équidé&#9;Coach
+1&#9;CHRISTIAN AHLMANN&#9;AHLMANN STABLES&#9;DOMINATOR 2000 Z&#9;..."
+      rows="8"
+    ></textarea>
+
+    <ion-button expand="block" (click)="parseTsv()" class="parse-button">
+      <ion-icon slot="start" name="eye-outline"></ion-icon>
+      Prévisualiser
+    </ion-button>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMessage" class="error-message">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Prévisualisation des cavaliers parsés -->
+  <div *ngIf="isParsed && parsedRiders.length > 0" class="preview-section">
+    <ion-label class="section-label">
+      {{ parsedRiders.length }} cavalier{{
+        parsedRiders.length > 1 ? 's' : ''
+      }}
+      trouvé{{ parsedRiders.length > 1 ? 's' : '' }}
+    </ion-label>
+
+    <ion-list class="preview-list">
+      <ion-item *ngFor="let rider of parsedRiders" lines="full">
+        <ion-label>
+          <div class="preview-rider">
+            <span class="preview-bib">{{ rider.bib }}</span>
+            <div class="preview-info">
+              <strong>{{ rider.name }}</strong>
+              <span class="preview-horse">{{ rider.horse }}</span>
+            </div>
+          </div>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <!-- Boutons d'import -->
+    <div class="import-actions">
+      <ion-button
+        expand="block"
+        color="primary"
+        (click)="importReplace()"
+        class="action-button"
+      >
+        <ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>
+        Remplacer la liste
+      </ion-button>
+      <ion-button
+        expand="block"
+        color="success"
+        (click)="importAppend()"
+        class="action-button"
+      >
+        <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+        Ajouter à la liste
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

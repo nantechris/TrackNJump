@@ -229,6 +229,22 @@ export class RiderService {
    * Supprime toutes les données.
    */
   async clearAll(): Promise<void> {
+    await this.ensureInit();
     await this._storage?.remove(this.STORAGE_KEY);
+  }
+
+  /**
+   * Remplace tous les cavaliers par une nouvelle liste.
+   * @param riders - Nouvelle liste de cavaliers (sans ID)
+   */
+  async replaceAllRiders(riders: Omit<Rider, 'id'>[]): Promise<void> {
+    await this.clearAll();
+    const newRiders: Rider[] = riders.map((r) => ({
+      ...r,
+      id: this.generateId(),
+      isNonStarter: r.isNonStarter ?? false,
+      hasPassed: (r as any).hasPassed ?? false,
+    }));
+    await this.saveRiders(newRiders);
   }
 }

@@ -1,19 +1,14 @@
 /**
  * Styles spécifiques à la page d'accueil (HomePage).
- *
- * L'application utilise un thème bleu foncé (#13253D) inspiré
- * du monde équestre, avec des cartes blanches pour chaque cavalier.
+ * Les styles de carte cavalier sont dans rider-card.component.scss.
  */
 
 // === EN-TÊTE ===
-
-// Couleur du texte dans l'en-tête (bleu foncé)
 ion-header {
   * {
     color: #13253d;
   }
 
-  // Titre centré en gras avec une taille plus grande que par défaut
   ion-title {
     font-size: 1.75em;
     font-weight: 700;
@@ -22,18 +17,43 @@ ion-header {
 }
 
 // === CONTENU PRINCIPAL ===
-
 ion-content {
-  // Fond bleu foncé pour le contenu principal
   --ion-background-color: #13253d;
 
-  // Couleur de texte par défaut pour tous les éléments enfants
-  * {
-    color: #13253d;
+  // === ÉTAT VIDE ===
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60%;
+    color: rgba(255, 255, 255, 0.6);
+
+    ion-icon {
+      font-size: 64px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.1rem;
+      margin: 4px 0;
+    }
+
+    .empty-hint {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.35);
+    }
   }
 
-  // === BOUTON DE PRÉFÉRENCE MANUELLE (droitier/gaucher) ===
-  // Positionné en bas à droite de l'écran, toujours visible
+  // === LISTE DES CAVALIERS ===
+  ion-list {
+    padding: 8px 0;
+    padding-bottom: 60px;
+  }
+
+  // === BOUTON DE PRÉFÉRENCE MANUELLE ===
   .manual-preference-container {
     position: fixed;
     bottom: 0;
@@ -43,164 +63,9 @@ ion-content {
     justify-content: flex-end;
     padding: 15px 10px 5px;
 
-    // Les icônes de main sont en blanc pour contraster avec le fond bleu
     * {
       padding-left: 10px;
       color: #fff;
     }
-  }
-
-  // === LISTE DES CAVALIERS ===
-  ion-list {
-    // Espacement interne de la liste
-    padding: 8px;
-
-    // Chaque carte de cavalier
-    ion-item {
-      // Marge entre les cartes
-      margin: 20px 10px;
-      // Fond blanc pour les cartes
-      --ion-background-color: #fff;
-      // Coins arrondis pour un look carte (card)
-      border-radius: 10px;
-      // Ombre portée subtile pour l'effet de profondeur
-      box-shadow: 5px 5px 10px -6px rgba(0, 0, 0, 0.75);
-
-      // Style pour les cavaliers non-partants
-      &.non-starter {
-        opacity: 0.5;
-        background-color: #f4f4f4;
-
-        ion-label {
-          text-decoration: line-through;
-        }
-      }
-
-      // Style pour les cavaliers passés (cochés)
-      &.passed {
-        background-color: #d4edda !important;
-        border-left: 6px solid #2dd36f;
-      }
-
-      // Icône pour cavalier passé (checkmark vert)
-      .passed-icon {
-        font-size: 32px;
-        color: #2dd36f;
-        cursor: pointer;
-        margin-left: 8px;
-      }
-
-      // Icône pour cavalier non passé (cercle gris)
-      .not-passed-icon {
-        font-size: 32px;
-        color: #999;
-        cursor: pointer;
-        margin-left: 8px;
-      }
-
-      // Layout interne : le label affiche ses enfants en ligne (flexbox)
-      ion-label {
-        display: flex;
-        align-items: center;
-
-        // Conteneur du numéro de dossard
-        .bib-container {
-          padding: 0 20px 0 10px;
-        }
-
-        // Numéro de dossard - grand et en gras pour être bien visible
-        .bib {
-          font-size: 2rem;
-          font-weight: 700;
-          border: none;
-          background: transparent;
-          width: 60px;
-          text-align: center;
-          color: #13253d;
-
-          &:focus {
-            outline: none;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-          }
-        }
-
-        // Conteneur pour le nom et le cheval, empilés verticalement
-        .textual-container {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-          flex: 1;
-
-          // Styles communs pour les inputs de nom et cheval
-          input {
-            border: none;
-            background: transparent;
-            color: #13253d;
-            width: 100%;
-
-            &:focus {
-              outline: none;
-              background-color: #f0f0f0;
-              border-radius: 5px;
-              padding: 2px 5px;
-            }
-          }
-
-          // Nom du cavalier - en gras et légèrement plus grand
-          .name {
-            font-size: 1.25rem;
-            font-weight: 700;
-          }
-
-          // Nom du cheval
-          .horse {
-            font-size: 1rem;
-          }
-        }
-      }
-    }
-  }
-}
-
-/* Swipe option styles */
-ion-item-options {
-  ion-item-option.status-option {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 1.25rem;
-    letter-spacing: 0.05em;
-    color: #ffffff !important;
-  }
-
-  ion-item-option.equal-width-option {
-    width: 50px;
-    max-width: 50px;
-  }
-  // Arrondir le premier bouton sur le côté gauche
-  ion-item-option.equal-width-option:first-child {
-    border-radius: 10px 0 0 10px;
-  }
-
-  // Arrondir le dernier bouton sur le côté droit
-  ion-item-option.equal-width-option:last-child {
-    border-radius: 0 10px 10px 0;
-  }
-  ion-item-option[color='danger'] ion-icon {
-    color: #ffffff !important;
-  }
-}
-
-/* More robust styling for trash icon (fill/stroke + color) */
-ion-item-option[color='danger'] {
-  /* ensure background contrasts with white icon */
-  --background: var(--ion-color-danger, #ff3b30);
-
-  ion-icon {
-    font-size: 24px !important;
-    color: #ffffff !important;
-    --ionicon-stroke-width: 32px;
   }
 }

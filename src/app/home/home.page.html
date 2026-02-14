@@ -1,4 +1,4 @@
-<!-- En-tête de la page avec le titre de l'application et bouton d'ajout -->
+<!-- En-tête de la page avec le titre de l'application et boutons d'action -->
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title> TrackNJump </ion-title>
@@ -13,119 +13,42 @@
   </ion-toolbar>
 </ion-header>
 
-<!-- Contenu principal de la page -->
+<!-- Contenu principal -->
 <ion-content class="flex-container" [fullscreen]="true">
-  <!-- Liste des cavaliers avec la fonctionnalité de réordonnancement -->
-  <ion-list>
-    <!--
-      ion-reorder-group : conteneur qui active le drag & drop
-      - [disabled]="false" : le réordonnancement est toujours actif
-      - (ionItemReorder) : événement déclenché quand un élément est déplacé
-    -->
+  <!-- Liste vide -->
+  <div *ngIf="riders.length === 0" class="empty-state">
+    <ion-icon name="people-outline"></ion-icon>
+    <p>Aucun cavalier</p>
+    <p class="empty-hint">Ajoutez un cavalier ou importez une épreuve</p>
+  </div>
+
+  <!-- Liste des cavaliers -->
+  <ion-list *ngIf="riders.length > 0">
     <ion-reorder-group
       [disabled]="false"
       (ionItemReorder)="handleReorder($event)"
     >
-      <!--
-        Boucle sur chaque cavalier de la liste.
-        ion-item-sliding permet le swipe pour supprimer.
-      -->
-      <ion-item-sliding *ngFor="let rider of riders">
-        <!-- Options de swipe à gauche : Marquer comme passé (action directe au swipe) -->
-        <ion-item-options side="start" (ionSwipe)="togglePassed(rider)">
-          <ion-item-option
-            [color]="rider.hasPassed ? 'medium' : 'success'"
-            expandable
-          >
-            <ion-icon slot="icon-only" name="checkmark-circle"></ion-icon>
-          </ion-item-option>
-        </ion-item-options>
-
-        <!-- Options de swipe à droite : Non-partant et Supprimer -->
-        <ion-item-options side="end">
-          <ion-item-option
-            class="status-option equal-width-option"
-            [color]="rider.isNonStarter ? 'success' : 'warning'"
-            (click)="toggleNonStarter(rider)"
-          >
-            {{ rider.isNonStarter ? 'P' : 'NP' }}
-          </ion-item-option>
-          <ion-item-option
-            class="equal-width-option"
-            color="danger"
-            (click)="deleteRider(rider)"
-          >
-            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-          </ion-item-option>
-        </ion-item-options>
-
-        <!-- Contenu de l'item avec édition inline -->
-        <ion-item
-          [class.non-starter]="rider.isNonStarter"
-          [class.passed]="rider.hasPassed"
-        >
-          <ion-label>
-            <!-- Numéro de dossard du cavalier (éditable) -->
-            <div class="bib-container">
-              <input
-                type="number"
-                class="bib"
-                [value]="rider.bib"
-                (blur)="updateRider(rider, 'bib', $event)"
-                min="1"
-              />
-            </div>
-
-            <div class="textual-container">
-              <!-- Nom du cavalier (éditable) -->
-              <input
-                type="text"
-                class="name"
-                [value]="rider.name"
-                (blur)="updateRider(rider, 'name', $event)"
-                placeholder="Nom du cavalier"
-              />
-              <!-- Nom du cheval (éditable) -->
-              <input
-                type="text"
-                class="horse"
-                [value]="rider.horse"
-                (blur)="updateRider(rider, 'horse', $event)"
-                placeholder="Nom du cheval"
-              />
-            </div>
-          </ion-label>
-
-          <!--
-            Poignée de réordonnancement (drag handle).
-            Le [slot] est dynamique selon la préférence de latéralité :
-            - "end" (droite) si rightHanded est true
-            - "start" (gauche) si rightHanded est false
-            L'icône utilisée est un fer à cheval (horseshoe) en accord avec le thème équestre.
-          -->
-          <ion-reorder [slot]="rightHanded ? 'end' : 'start'">
-            <img src="../../assets/icon/horseshoe.svg" alt="horseshoe" />
-          </ion-reorder>
-        </ion-item>
+      <ion-item-sliding *ngFor="let rider of riders; trackBy: trackByRiderId">
+        <app-rider-card
+          [rider]="rider"
+          [rightHanded]="rightHanded"
+          (passed)="togglePassed($event)"
+          (nonStarter)="toggleNonStarter($event)"
+          (deleted)="deleteRider($event)"
+          (updated)="onRiderUpdated($event)"
+        ></app-rider-card>
       </ion-item-sliding>
     </ion-reorder-group>
   </ion-list>
 
-  <!--
-    Bouton flottant en bas à droite pour changer la préférence de latéralité.
-    Affiche l'icône correspondante (main droite ou main gauche)
-    et bascule au clic entre droitier et gaucher.
-  -->
+  <!-- Bouton de latéralité -->
   <div class="manual-preference-container">
-    <!-- Affiché si l'utilisateur est droitier -->
     <img
       *ngIf="rightHanded; else leftHanded"
       src="../../assets/icon/rightHanded.svg"
       alt="rightHanded"
       (click)="changeLiterality()"
     />
-
-    <!-- Template alternatif : affiché si l'utilisateur est gaucher -->
     <ng-template #leftHanded>
       <img
         src="../../assets/icon/leftHanded.svg"
