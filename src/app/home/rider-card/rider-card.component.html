@@ -1,5 +1,10 @@
 <!-- Options de swipe à gauche : Marquer comme passé (action directe au swipe) -->
-<ion-item-options side="start" (ionSwipe)="onTogglePassed()">
+<!-- Désactivé pour les non-partants -->
+<ion-item-options
+  *ngIf="!rider.isNonStarter"
+  side="start"
+  (ionSwipe)="onTogglePassed()"
+>
   <ion-item-option [color]="rider.hasPassed ? 'medium' : 'success'" expandable>
     <ion-icon slot="icon-only" name="checkmark-circle"></ion-icon>
   </ion-item-option>

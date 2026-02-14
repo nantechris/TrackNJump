@@ -185,7 +185,7 @@ export class RiderService {
    * @param id - ID du cavalier
    */
   async markAsNonStarter(id: string): Promise<void> {
-    await this.updateRider(id, { isNonStarter: true });
+    await this.updateRider(id, { isNonStarter: true, hasPassed: false });
   }
 
   /**

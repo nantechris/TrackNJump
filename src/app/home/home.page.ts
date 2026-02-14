@@ -1,7 +1,7 @@
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   AlertController,
-  IonItemSliding,
+  IonList,
   ItemReorderEventDetail,
   ModalController,
 } from '@ionic/angular';
@@ -33,9 +33,9 @@ import {
 })
 export class HomePage implements OnInit {
   /**
-   * Référence à tous les éléments ion-item-sliding
+   * Référence à la liste pour fermer les sliding items
    */
-  @ViewChildren(IonItemSliding) slidingItems?: QueryList<IonItemSliding>;
+  @ViewChild(IonList) list?: IonList;
 
   /**
    * Indique si l'utilisateur est droitier (true) ou gaucher (false).
@@ -177,9 +177,9 @@ export class HomePage implements OnInit {
    * @param rider - Le cavalier à supprimer
    */
   async deleteRider(rider: Rider): Promise<void> {
+    await this.closeAllSlidingItems();
     await this.riderService.deleteRider(rider.id);
     await this.loadRiders();
-    this.closeAllSlidingItems();
   }
 
   /**
@@ -187,22 +187,40 @@ export class HomePage implements OnInit {
    * @param rider - Le cavalier à marquer
    */
   async toggleNonStarter(rider: Rider): Promise<void> {
+    // Mettre à jour l'objet en place pour que le DOM ne soit pas reconstruit
+    rider.isNonStarter = !rider.isNonStarter;
+    // Si on passe en non-partant, retirer le statut passé
     if (rider.isNonStarter) {
-      await this.riderService.markAsStarter(rider.id);
-    } else {
-      await this.riderService.markAsNonStarter(rider.id);
+      rider.hasPassed = false;
     }
+    // Sauvegarder en arrière-plan
+    if (rider.isNonStarter) {
+      await this.riderService.markAsNonStarter(rider.id);
+    } else {
+      await this.riderService.markAsStarter(rider.id);
+    }
+    // Fermer le slide puis réordonner (NP va en fin de liste)
+    await this.closeAllSlidingItems();
     await this.loadRiders();
-    this.closeAllSlidingItems();
   }
 
   /**
    * Bascule l'état "passé" d'un cavalier.
+   * Ne fait rien si le cavalier est non-partant.
    * @param rider - Le cavalier à marquer comme passé/non passé
    */
   async togglePassed(rider: Rider): Promise<void> {
+    // Un non-partant ne peut pas être marqué comme passé
+    if (rider.isNonStarter) {
+      await this.closeAllSlidingItems();
+      return;
+    }
+    // Mettre à jour l'objet en place pour que le DOM ne soit pas reconstruit
+    rider.hasPassed = !rider.hasPassed;
+    // Sauvegarder en arrière-plan
     await this.riderService.togglePassed(rider.id);
-    await this.loadRiders();
+    // Fermer le slide proprement
+    await this.closeAllSlidingItems();
   }
 
   /**
@@ -235,9 +253,12 @@ export class HomePage implements OnInit {
   }
 
   /**
-   * Ferme tous les éléments swipés ouverts.
+   * Ferme tous les éléments swipés ouverts avec animation.
+   * Attend la fin de l'animation avant de résoudre.
    */
-  private closeAllSlidingItems(): void {
-    this.slidingItems?.forEach((item) => item.close());
+  private async closeAllSlidingItems(): Promise<void> {
+    await this.list?.closeSlidingItems();
+    // Attendre la fin de l'animation CSS de fermeture du slide
+    await new Promise((resolve) => setTimeout(resolve, 300));
   }
 }
