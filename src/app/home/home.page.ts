@@ -148,6 +148,7 @@ export class HomePage implements OnInit {
    */
   private async parseTsvAndImport(tsvData: string): Promise<void> {
     const lines = tsvData.trim().split('\n');
+    const ridersToAdd: Omit<Rider, 'id'>[] = [];
 
     // Ignorer la première ligne (entête)
     for (let i = 1; i < lines.length; i++) {
@@ -163,7 +164,7 @@ export class HomePage implements OnInit {
         const horse = columns[3].trim();
 
         if (!isNaN(bib) && name && horse) {
-          await this.riderService.addRider({
+          ridersToAdd.push({
             bib,
             name,
             horse,
@@ -172,6 +173,11 @@ export class HomePage implements OnInit {
           });
         }
       }
+    }
+
+    // Ajouter tous les cavaliers en une seule fois
+    for (const rider of ridersToAdd) {
+      await this.riderService.addRider(rider);
     }
   }
 

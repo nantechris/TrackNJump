@@ -33,9 +33,10 @@ export interface Rider {
 export class RiderService {
   private readonly STORAGE_KEY = 'riders';
   private _storage: Storage | null = null;
+  private initPromise: Promise<void>;
 
   constructor(private storage: Storage) {
-    this.init();
+    this.initPromise = this.init();
   }
 
   /**
@@ -48,10 +49,18 @@ export class RiderService {
   }
 
   /**
+   * S'assure que le stockage est initialisé.
+   */
+  private async ensureInit(): Promise<void> {
+    await this.initPromise;
+  }
+
+  /**
    * Récupère tous les cavaliers depuis le stockage.
    * @returns Liste des cavaliers triée (partants puis non-partants)
    */
   async getRiders(): Promise<Rider[]> {
+    await this.ensureInit();
     const riders = await this._storage?.get(this.STORAGE_KEY);
 
     // Si aucune donnée n'existe, initialiser avec des données par défaut
@@ -121,6 +130,7 @@ export class RiderService {
    * @param riders - Liste des cavaliers à sauvegarder
    */
   async saveRiders(riders: Rider[]): Promise<void> {
+    await this.ensureInit();
     const sorted = this.sortRiders(riders);
     await this._storage?.set(this.STORAGE_KEY, sorted);
   }
