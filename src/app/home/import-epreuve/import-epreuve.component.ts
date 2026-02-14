@@ -65,27 +65,60 @@ export class ImportEpreuveComponent {
 
     const lines = this.tsvData.trim().split('\n');
 
-    // Ignorer la première ligne (entête)
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
+    // Détecter le format
+    const firstLine = lines[0].trim();
+    const hasHeader =
+      firstLine.toLowerCase().includes('dossard') ||
+      firstLine.toLowerCase().includes('cavalier');
 
-      const columns = line.split('\t');
+    // Format sans en-tête : chaque cavalier sur 5 lignes (numéro, nom, club, cheval, coach)
+    const isMultiLineFormat =
+      !firstLine.includes('\t') && !isNaN(parseInt(firstLine, 10));
 
-      // Format: Dossard\tCavalier\tClub engageur\tÉquidé\tCoach
-      if (columns.length >= 4) {
-        const bib = parseInt(columns[0], 10);
-        const name = columns[1].trim();
-        const horse = columns[3].trim();
+    if (isMultiLineFormat) {
+      // Format mobile : chaque cavalier sur 5 lignes
+      for (let i = 0; i < lines.length; i += 5) {
+        if (i + 4 < lines.length) {
+          const bib = parseInt(lines[i].trim(), 10);
+          const name = lines[i + 1].trim();
+          const horse = lines[i + 3].trim();
 
-        if (!isNaN(bib) && name && horse) {
-          this.parsedRiders.push({
-            bib,
-            name,
-            horse,
-            isNonStarter: false,
-            hasPassed: false,
-          });
+          if (!isNaN(bib) && name && horse) {
+            this.parsedRiders.push({
+              bib,
+              name,
+              horse,
+              isNonStarter: false,
+              hasPassed: false,
+            });
+          }
+        }
+      }
+    } else {
+      // Format TSV classique avec tabulations
+      const startIndex = hasHeader ? 1 : 0;
+
+      for (let i = startIndex; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const columns = line.split('\t');
+
+        // Format: Dossard\tCavalier\tClub engageur\tÉquidé\tCoach
+        if (columns.length >= 4) {
+          const bib = parseInt(columns[0], 10);
+          const name = columns[1].trim();
+          const horse = columns[3].trim();
+
+          if (!isNaN(bib) && name && horse) {
+            this.parsedRiders.push({
+              bib,
+              name,
+              horse,
+              isNonStarter: false,
+              hasPassed: false,
+            });
+          }
         }
       }
     }

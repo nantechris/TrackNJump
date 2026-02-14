@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import {
   AlertController,
+  IonItemSliding,
   ItemReorderEventDetail,
   ModalController,
 } from '@ionic/angular';
@@ -31,6 +32,11 @@ import {
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
+  /**
+   * Référence à tous les éléments ion-item-sliding
+   */
+  @ViewChildren(IonItemSliding) slidingItems?: QueryList<IonItemSliding>;
+
   /**
    * Indique si l'utilisateur est droitier (true) ou gaucher (false).
    * Détermine de quel côté apparaît la poignée de réordonnancement :
@@ -173,6 +179,7 @@ export class HomePage implements OnInit {
   async deleteRider(rider: Rider): Promise<void> {
     await this.riderService.deleteRider(rider.id);
     await this.loadRiders();
+    this.closeAllSlidingItems();
   }
 
   /**
@@ -186,6 +193,7 @@ export class HomePage implements OnInit {
       await this.riderService.markAsNonStarter(rider.id);
     }
     await this.loadRiders();
+    this.closeAllSlidingItems();
   }
 
   /**
@@ -224,5 +232,12 @@ export class HomePage implements OnInit {
     this.riders = event.detail.complete(this.riders);
     // Sauvegarde le nouvel ordre
     await this.riderService.reorderRiders(this.riders);
+  }
+
+  /**
+   * Ferme tous les éléments swipés ouverts.
+   */
+  private closeAllSlidingItems(): void {
+    this.slidingItems?.forEach((item) => item.close());
   }
 }
