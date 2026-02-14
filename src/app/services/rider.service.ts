@@ -9,6 +9,7 @@ import { Storage } from '@ionic/storage-angular';
  * @property name - Nom du cavalier
  * @property horse - Nom du cheval monté par le cavalier
  * @property isNonStarter - Indique si le cavalier est non-partant
+ * @property hasPassed - Indique si le cavalier est déjà passé
  */
 export interface Rider {
   id: string;
@@ -16,17 +17,18 @@ export interface Rider {
   name: string;
   horse: string;
   isNonStarter: boolean;
+  hasPassed: boolean;
 }
 
 /**
  * Service de gestion des cavaliers avec persistance des données.
- * 
+ *
  * Utilise @ionic/storage-angular (IndexedDB/localStorage) pour une compatibilité
  * Android, iOS et Web. Les données sont automatiquement sauvegardées après chaque
  * modification.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RiderService {
   private readonly STORAGE_KEY = 'riders';
@@ -51,14 +53,14 @@ export class RiderService {
    */
   async getRiders(): Promise<Rider[]> {
     const riders = await this._storage?.get(this.STORAGE_KEY);
-    
+
     // Si aucune donnée n'existe, initialiser avec des données par défaut
     if (!riders || riders.length === 0) {
       const defaultRiders = this.getDefaultRiders();
       await this.saveRiders(defaultRiders);
       return defaultRiders;
     }
-    
+
     return this.sortRiders(riders);
   }
 
@@ -68,10 +70,38 @@ export class RiderService {
    */
   private getDefaultRiders(): Rider[] {
     return [
-      { id: this.generateId(), bib: 1, name: 'Christian Ahlmann', horse: 'Dominator 2000 Z', isNonStarter: false },
-      { id: this.generateId(), bib: 2, name: 'Edwina Tops Alexander', horse: 'Itot du Chateau', isNonStarter: false },
-      { id: this.generateId(), bib: 3, name: 'Marcus Ehning', horse: 'Comme Il Faut', isNonStarter: false },
-      { id: this.generateId(), bib: 4, name: 'Judy-Ann Melchior', horse: 'Levisto Z', isNonStarter: false },
+      {
+        id: this.generateId(),
+        bib: 1,
+        name: 'Christian Ahlmann',
+        horse: 'Dominator 2000 Z',
+        isNonStarter: false,
+        hasPassed: false,
+      },
+      {
+        id: this.generateId(),
+        bib: 2,
+        name: 'Edwina Tops Alexander',
+        horse: 'Itot du Chateau',
+        isNonStarter: false,
+        hasPassed: false,
+      },
+      {
+        id: this.generateId(),
+        bib: 3,
+        name: 'Marcus Ehning',
+        horse: 'Comme Il Faut',
+        isNonStarter: false,
+        hasPassed: false,
+      },
+      {
+        id: this.generateId(),
+        bib: 4,
+        name: 'Judy-Ann Melchior',
+        horse: 'Levisto Z',
+        isNonStarter: false,
+        hasPassed: false,
+      },
     ];
   }
 
@@ -81,8 +111,8 @@ export class RiderService {
    * @returns Liste triée
    */
   private sortRiders(riders: Rider[]): Rider[] {
-    const starters = riders.filter(r => !r.isNonStarter);
-    const nonStarters = riders.filter(r => r.isNonStarter);
+    const starters = riders.filter((r) => !r.isNonStarter);
+    const nonStarters = riders.filter((r) => r.isNonStarter);
     return [...starters, ...nonStarters];
   }
 
@@ -105,7 +135,8 @@ export class RiderService {
     const newRider: Rider = {
       ...rider,
       id: this.generateId(),
-      isNonStarter: rider.isNonStarter ?? false
+      isNonStarter: rider.isNonStarter ?? false,
+      hasPassed: (rider as any).hasPassed ?? false,
     };
     riders.push(newRider);
     await this.saveRiders(riders);
@@ -117,9 +148,12 @@ export class RiderService {
    * @param id - ID du cavalier à modifier
    * @param updates - Propriétés à mettre à jour
    */
-  async updateRider(id: string, updates: Partial<Omit<Rider, 'id'>>): Promise<void> {
+  async updateRider(
+    id: string,
+    updates: Partial<Omit<Rider, 'id'>>,
+  ): Promise<void> {
     const riders = await this.getRiders();
-    const index = riders.findIndex(r => r.id === id);
+    const index = riders.findIndex((r) => r.id === id);
     if (index !== -1) {
       riders[index] = { ...riders[index], ...updates };
       await this.saveRiders(riders);
@@ -132,7 +166,7 @@ export class RiderService {
    */
   async deleteRider(id: string): Promise<void> {
     const riders = await this.getRiders();
-    const filtered = riders.filter(r => r.id !== id);
+    const filtered = riders.filter((r) => r.id !== id);
     await this.saveRiders(filtered);
   }
 
@@ -150,6 +184,19 @@ export class RiderService {
    */
   async markAsStarter(id: string): Promise<void> {
     await this.updateRider(id, { isNonStarter: false });
+  }
+
+  /**
+   * Bascule l'état "passé" d'un cavalier.
+   * @param id - ID du cavalier
+   */
+  async togglePassed(id: string): Promise<void> {
+    const riders = await this.getRiders();
+    const rider = riders.find((r) => r.id === id);
+    if (rider) {
+      rider.hasPassed = !rider.hasPassed;
+      await this.saveRiders(riders);
+    }
   }
 
   /**

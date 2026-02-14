@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController, ItemReorderEventDetail } from '@ionic/angular';
-import { RiderService, Rider } from '../services/rider.service';
+import { Rider, RiderService } from '../services/rider.service';
 
 /**
  * HomePage - Page principale de l'application TrackNJump.
@@ -39,7 +39,7 @@ export class HomePage implements OnInit {
 
   constructor(
     private riderService: RiderService,
-    private alertController: AlertController
+    private alertController: AlertController,
   ) {}
 
   /**
@@ -67,23 +67,23 @@ export class HomePage implements OnInit {
           name: 'bib',
           type: 'number',
           placeholder: 'Numéro de dossard',
-          min: 1
+          min: 1,
         },
         {
           name: 'name',
           type: 'text',
-          placeholder: 'Nom du cavalier'
+          placeholder: 'Nom du cavalier',
         },
         {
           name: 'horse',
           type: 'text',
-          placeholder: 'Nom du cheval'
-        }
+          placeholder: 'Nom du cheval',
+        },
       ],
       buttons: [
         {
           text: 'Annuler',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Ajouter',
@@ -93,13 +93,14 @@ export class HomePage implements OnInit {
                 bib: parseInt(data.bib, 10),
                 name: data.name,
                 horse: data.horse,
-                isNonStarter: false
+                isNonStarter: false,
+                hasPassed: false,
               });
               await this.loadRiders();
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     await alert.present();
@@ -111,10 +112,14 @@ export class HomePage implements OnInit {
    * @param field - Le champ modifié ('bib', 'name' ou 'horse')
    * @param event - L'événement de modification
    */
-  async updateRider(rider: Rider, field: 'bib' | 'name' | 'horse', event: any): Promise<void> {
+  async updateRider(
+    rider: Rider,
+    field: 'bib' | 'name' | 'horse',
+    event: any,
+  ): Promise<void> {
     const value = event.target.value;
     const updates: any = {};
-    
+
     if (field === 'bib') {
       updates.bib = parseInt(value, 10);
     } else {
@@ -147,6 +152,15 @@ export class HomePage implements OnInit {
   }
 
   /**
+   * Bascule l'état "passé" d'un cavalier.
+   * @param rider - Le cavalier à marquer comme passé/non passé
+   */
+  async togglePassed(rider: Rider): Promise<void> {
+    await this.riderService.togglePassed(rider.id);
+    await this.loadRiders();
+  }
+
+  /**
    * Bascule la préférence de latéralité (droitier ↔ gaucher).
    * Cela déplace la poignée de réordonnancement de l'autre côté de l'écran
    * pour faciliter l'utilisation de l'application d'une seule main.
@@ -166,7 +180,9 @@ export class HomePage implements OnInit {
    * @param event - L'événement de réordonnancement Ionic contenant
    *                les indices source (from) et destination (to)
    */
-  async handleReorder(event: CustomEvent<ItemReorderEventDetail>): Promise<void> {
+  async handleReorder(
+    event: CustomEvent<ItemReorderEventDetail>,
+  ): Promise<void> {
     // Complete retourne le nouveau tableau réordonné
     this.riders = event.detail.complete(this.riders);
     // Sauvegarde le nouvel ordre

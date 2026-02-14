@@ -70,10 +70,32 @@ ion-content {
       &.non-starter {
         opacity: 0.5;
         background-color: #f4f4f4;
-        
+
         ion-label {
           text-decoration: line-through;
         }
+      }
+
+      // Style pour les cavaliers passés (cochés)
+      &.passed {
+        background-color: #d4edda !important;
+        border-left: 6px solid #2dd36f;
+      }
+
+      // Icône pour cavalier passé (checkmark vert)
+      .passed-icon {
+        font-size: 32px;
+        color: #2dd36f;
+        cursor: pointer;
+        margin-left: 8px;
+      }
+
+      // Icône pour cavalier non passé (cercle gris)
+      .not-passed-icon {
+        font-size: 32px;
+        color: #999;
+        cursor: pointer;
+        margin-left: 8px;
       }
 
       // Layout interne : le label affiche ses enfants en ligne (flexbox)
@@ -95,7 +117,7 @@ ion-content {
           width: 60px;
           text-align: center;
           color: #13253d;
-          
+
           &:focus {
             outline: none;
             background-color: #f0f0f0;
@@ -116,7 +138,7 @@ ion-content {
             background: transparent;
             color: #13253d;
             width: 100%;
-            
+
             &:focus {
               outline: none;
               background-color: #f0f0f0;
@@ -130,7 +152,7 @@ ion-content {
             font-size: 1.25rem;
             font-weight: 700;
           }
-          
+
           // Nom du cheval
           .horse {
             font-size: 1rem;
@@ -153,19 +175,19 @@ ion-item-options {
     color: #ffffff !important;
   }
 
-  ion-item-option[color="danger"] ion-icon {
+  ion-item-option[color='danger'] ion-icon {
     color: #ffffff !important;
   }
 }
 
 /* More robust styling for trash icon (fill/stroke + color) */
-.trash-icon {
-  color: #ffffff !important;
-  --ionicon-stroke: #ffffff !important;
-  --ionicon-fill: #ffffff !important;
-}
-
-ion-item-option[color="danger"] {
+ion-item-option[color='danger'] {
   /* ensure background contrasts with white icon */
   --background: var(--ion-color-danger, #ff3b30);
+
+  ion-icon {
+    font-size: 24px !important;
+    color: #ffffff !important;
+    --ionicon-stroke-width: 32px;
+  }
 }
