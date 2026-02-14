@@ -3,6 +3,9 @@
   <ion-toolbar>
     <ion-title> TrackNJump </ion-title>
     <ion-buttons slot="end">
+      <ion-button (click)="importRiders()">
+        <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>
+      </ion-button>
       <ion-button (click)="addRider()">
         <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
       </ion-button>

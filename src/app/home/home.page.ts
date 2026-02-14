@@ -107,6 +107,75 @@ export class HomePage implements OnInit {
   }
 
   /**
+   * Affiche une alerte pour importer une liste de cavaliers depuis un TSV.
+   * Format attendu : Dossard\tCavalier\tClub engageur\tÉquidé\tCoach
+   */
+  async importRiders(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Importer des cavaliers',
+      message: "Collez les données TSV de la FFE (incluant l'entête)",
+      inputs: [
+        {
+          name: 'tsvData',
+          type: 'textarea',
+          placeholder:
+            'Dossard\tCavalier\tClub engageur\tÉquidé\tCoach\n1\tChristian Ahlmann\t...',
+        },
+      ],
+      buttons: [
+        {
+          text: 'Annuler',
+          role: 'cancel',
+        },
+        {
+          text: 'Importer',
+          handler: async (data) => {
+            if (data.tsvData) {
+              await this.parseTsvAndImport(data.tsvData);
+              await this.loadRiders();
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  /**
+   * Parse les données TSV et importe les cavaliers.
+   * @param tsvData - Données TSV copiées-collées
+   */
+  private async parseTsvAndImport(tsvData: string): Promise<void> {
+    const lines = tsvData.trim().split('\n');
+
+    // Ignorer la première ligne (entête)
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      const columns = line.split('\t');
+
+      // Format: Dossard\tCavalier\tClub engageur\tÉquidé\tCoach
+      if (columns.length >= 4) {
+        const bib = parseInt(columns[0], 10);
+        const name = columns[1].trim();
+        const horse = columns[3].trim();
+
+        if (!isNaN(bib) && name && horse) {
+          await this.riderService.addRider({
+            bib,
+            name,
+            horse,
+            isNonStarter: false,
+            hasPassed: false,
+          });
+        }
+      }
+    }
+  }
+
+  /**
    * Met à jour un cavalier (dossard, nom ou cheval).
    * @param rider - Le cavalier à mettre à jour
    * @param field - Le champ modifié ('bib', 'name' ou 'horse')
