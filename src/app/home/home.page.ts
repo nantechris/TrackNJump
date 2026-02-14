@@ -187,21 +187,41 @@ export class HomePage implements OnInit {
    * @param rider - Le cavalier à marquer
    */
   async toggleNonStarter(rider: Rider): Promise<void> {
-    // Mettre à jour l'objet en place pour que le DOM ne soit pas reconstruit
-    rider.isNonStarter = !rider.isNonStarter;
-    // Si on passe en non-partant, retirer le statut passé
-    if (rider.isNonStarter) {
-      rider.hasPassed = false;
+    const idx = this.riders.indexOf(rider);
+    if (idx === -1) {
+      await this.closeAllSlidingItems();
+      return;
     }
-    // Sauvegarder en arrière-plan
-    if (rider.isNonStarter) {
+
+    const becomingNonStarter = !rider.isNonStarter;
+
+    // Remove from current position
+    this.riders.splice(idx, 1);
+
+    if (becomingNonStarter) {
+      // Mark as non-starter, clear passed status and move to end
+      rider.isNonStarter = true;
+      rider.hasPassed = false;
+      this.riders.push(rider);
       await this.riderService.markAsNonStarter(rider.id);
     } else {
+      // Becoming starter: mark and insert at the end of starters (just before first non-starter)
+      rider.isNonStarter = false;
+
+      const firstNonStarter = this.riders.findIndex((r) => r.isNonStarter);
+      if (firstNonStarter === -1) {
+        // no non-starters -> append to end
+        this.riders.push(rider);
+      } else {
+        this.riders.splice(firstNonStarter, 0, rider);
+      }
+
       await this.riderService.markAsStarter(rider.id);
     }
-    // Fermer le slide puis réordonner (NP va en fin de liste)
+
+    // Persist new order and close slides
+    await this.riderService.reorderRiders(this.riders);
     await this.closeAllSlidingItems();
-    await this.loadRiders();
   }
 
   /**
@@ -215,10 +235,39 @@ export class HomePage implements OnInit {
       await this.closeAllSlidingItems();
       return;
     }
-    // Mettre à jour l'objet en place pour que le DOM ne soit pas reconstruit
-    rider.hasPassed = !rider.hasPassed;
-    // Sauvegarder en arrière-plan
-    await this.riderService.togglePassed(rider.id);
+    const wasPassed = !!rider.hasPassed;
+    const nowPassed = !wasPassed;
+
+    // If toggling to passed, move after last passed
+    if (nowPassed) {
+      // ensure not non-starter
+      rider.isNonStarter = false;
+
+      const idx = this.riders.indexOf(rider);
+      if (idx === -1) {
+        await this.closeAllSlidingItems();
+        return;
+      }
+      // remove from current position
+      this.riders.splice(idx, 1);
+
+      // find last passed in remaining list
+      let lastPassed = -1;
+      for (let i = 0; i < this.riders.length; i++) {
+        if (this.riders[i].hasPassed) lastPassed = i;
+      }
+      const insertIndex = lastPassed + 1;
+      rider.hasPassed = true;
+      this.riders.splice(insertIndex, 0, rider);
+
+      // Persist new order and flags
+      await this.riderService.reorderRiders(this.riders);
+    } else {
+      // Unmarking passed: keep current order, just update flag
+      rider.hasPassed = false;
+      await this.riderService.updateRider(rider.id, { hasPassed: false });
+    }
+
     // Fermer le slide proprement
     await this.closeAllSlidingItems();
   }

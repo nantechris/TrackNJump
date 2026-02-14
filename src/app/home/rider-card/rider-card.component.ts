@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output } from '@angular/core';
 import { Rider } from '../../services/rider.service';
 
 /**
@@ -35,8 +35,45 @@ export class RiderCardComponent {
     event: any;
   }>();
 
+  private touchStartX: number | null = null;
+
+  constructor(private el: ElementRef) {}
+
   onTogglePassed(): void {
     this.passed.emit(this.rider);
+  }
+
+  // touch handlers to detect a right swipe and toggle passed
+  onTouchStart(event: TouchEvent): void {
+    if (event.touches && event.touches.length > 0) {
+      this.touchStartX = event.touches[0].clientX;
+    }
+  }
+
+  onTouchEnd(event: TouchEvent): void {
+    if (this.touchStartX === null) return;
+    const touch = event.changedTouches && event.changedTouches[0];
+    if (!touch) {
+      this.touchStartX = null;
+      return;
+    }
+    const deltaX = touch.clientX - this.touchStartX;
+    const SWIPE_THRESHOLD = 40;
+    if (deltaX > SWIPE_THRESHOLD && !this.rider.isNonStarter) {
+      this.onTogglePassed();
+      // close parent ion-item-sliding if any to avoid showing options
+      const sliding = (this.el.nativeElement as HTMLElement).closest('ion-item-sliding');
+      if (sliding && typeof (sliding as any).close === 'function') {
+        try {
+          (sliding as any).close();
+        } catch {}
+      }
+    }
+    this.touchStartX = null;
+  }
+
+  onTouchCancel(): void {
+    this.touchStartX = null;
   }
 
   onToggleNonStarter(): void {
@@ -48,6 +85,8 @@ export class RiderCardComponent {
   }
 
   onUpdate(field: 'bib' | 'name' | 'horse', event: any): void {
+    // Do not allow updates when the rider is marked non-starter
+    if (this.rider && this.rider.isNonStarter) return;
     this.updated.emit({ rider: this.rider, field, event });
   }
 }

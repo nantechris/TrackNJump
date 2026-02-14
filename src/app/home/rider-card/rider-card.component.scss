@@ -132,6 +132,16 @@ ion-item-options {
   }
 }
 
+/* Hidden start option used to capture ionSwipe without visual UI */
+.invisible-start {
+  width: 0 !important;
+  overflow: hidden !important;
+}
+
+.hidden-start-option {
+  display: none !important;
+}
+
 ion-item-option[color='danger'] {
   --background: var(--ion-color-danger, #ff3b30);
 

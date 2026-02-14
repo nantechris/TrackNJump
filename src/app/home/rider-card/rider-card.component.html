@@ -1,13 +1,7 @@
-<!-- Options de swipe à gauche : Marquer comme passé (action directe au swipe) -->
-<!-- Désactivé pour les non-partants -->
-<ion-item-options
-  *ngIf="!rider.isNonStarter"
-  side="start"
-  (ionSwipe)="onTogglePassed()"
->
-  <ion-item-option [color]="rider.hasPassed ? 'medium' : 'success'" expandable>
-    <ion-icon slot="icon-only" name="checkmark-circle"></ion-icon>
-  </ion-item-option>
+<!-- Start swipe option removed: swipe right toggles directly via touch handlers -->
+<!-- Invisible start option to emit ionSwipe without showing UI (disabled for non-starters) -->
+<ion-item-options *ngIf="!rider.isNonStarter" side="start" class="invisible-start" (ionSwipe)="onTogglePassed()">
+  <ion-item-option class="hidden-start-option"></ion-item-option>
 </ion-item-options>
 
 <!-- Options de swipe à droite : Non-partant et Supprimer -->
@@ -32,6 +26,9 @@
 <ion-item
   [class.non-starter]="rider.isNonStarter"
   [class.passed]="rider.hasPassed"
+  (touchstart)="onTouchStart($event)"
+  (touchend)="onTouchEnd($event)"
+  (touchcancel)="onTouchCancel()"
 >
   <ion-label>
     <div class="bib-container">
@@ -42,6 +39,7 @@
         (blur)="onUpdate('bib', $event)"
         min="1"
         inputmode="numeric"
+        [readonly]="rider.isNonStarter"
       />
     </div>
 
@@ -53,6 +51,7 @@
         (blur)="onUpdate('name', $event)"
         placeholder="Nom du cavalier"
         autocomplete="off"
+        [readonly]="rider.isNonStarter"
       />
       <input
         type="text"
@@ -61,6 +60,7 @@
         (blur)="onUpdate('horse', $event)"
         placeholder="Nom du cheval"
         autocomplete="off"
+        [readonly]="rider.isNonStarter"
       />
     </div>
   </ion-label>
