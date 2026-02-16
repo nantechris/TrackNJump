@@ -1,7 +1,12 @@
-<!-- Start swipe option removed: swipe right toggles directly via touch handlers -->
-<!-- Invisible start option to emit ionSwipe without showing UI (disabled for non-starters) -->
-<ion-item-options *ngIf="!rider.isNonStarter" side="start" class="invisible-start" (ionSwipe)="onTogglePassed()">
-  <ion-item-option class="hidden-start-option"></ion-item-option>
+<!-- Options de swipe à gauche : Marquer comme passé (action directe au swipe) -->
+<!-- Désactivé pour les non-partants -->
+<ion-item-options
+  *ngIf="!rider.isNonStarter"
+  side="start"
+  class="stealth-start"
+  (ionSwipe)="onTogglePassed()"
+>
+  <ion-item-option class="stealth-option" expandable> </ion-item-option>
 </ion-item-options>
 
 <!-- Options de swipe à droite : Non-partant et Supprimer -->
@@ -26,9 +31,6 @@
 <ion-item
   [class.non-starter]="rider.isNonStarter"
   [class.passed]="rider.hasPassed"
-  (touchstart)="onTouchStart($event)"
-  (touchend)="onTouchEnd($event)"
-  (touchcancel)="onTouchCancel()"
 >
   <ion-label>
     <div class="bib-container">

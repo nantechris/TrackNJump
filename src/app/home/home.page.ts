@@ -238,6 +238,9 @@ export class HomePage implements OnInit {
     const wasPassed = !!rider.hasPassed;
     const nowPassed = !wasPassed;
 
+    // Close sliding items first so the card snaps back before reordering
+    await this.closeAllSlidingItems();
+
     // If toggling to passed, move after last passed
     if (nowPassed) {
       // ensure not non-starter
@@ -245,7 +248,6 @@ export class HomePage implements OnInit {
 
       const idx = this.riders.indexOf(rider);
       if (idx === -1) {
-        await this.closeAllSlidingItems();
         return;
       }
       // remove from current position
@@ -267,9 +269,6 @@ export class HomePage implements OnInit {
       rider.hasPassed = false;
       await this.riderService.updateRider(rider.id, { hasPassed: false });
     }
-
-    // Fermer le slide proprement
-    await this.closeAllSlidingItems();
   }
 
   /**

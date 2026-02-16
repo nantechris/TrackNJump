@@ -102,6 +102,20 @@ ion-item {
   }
 }
 
+/* Stealth start option: functional but invisible */
+.stealth-start {
+  --background: transparent;
+  background: transparent !important;
+}
+
+.stealth-option {
+  --background: transparent !important;
+  --color: transparent !important;
+  background: transparent !important;
+  color: transparent !important;
+  min-width: 0;
+}
+
 /* Swipe option styles */
 ion-item-options {
   ion-item-option.status-option {
@@ -130,16 +144,6 @@ ion-item-options {
   ion-item-option[color='danger'] ion-icon {
     color: #ffffff !important;
   }
-}
-
-/* Hidden start option used to capture ionSwipe without visual UI */
-.invisible-start {
-  width: 0 !important;
-  overflow: hidden !important;
-}
-
-.hidden-start-option {
-  display: none !important;
 }
 
 ion-item-option[color='danger'] {
