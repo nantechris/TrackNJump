@@ -197,8 +197,7 @@ export class HomePage implements OnInit {
 
     if (becomingNonStarter) {
       // Fermer le sliding et attendre la fin de l'animation
-      await this.closeAllSlidingItems();
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await this.closeAllSlidingItems(600);
 
       // Remove from current position
       this.riders.splice(idx, 1);
@@ -219,19 +218,18 @@ export class HomePage implements OnInit {
       if (firstNonStarter === -1) {
         // no non-starters -> append to end
         this.riders.push(rider);
+        await this.closeAllSlidingItems(0);
       } else {
+        // Fermer le sliding et attendre la fin de l'animation
+        await this.closeAllSlidingItems(0);
         this.riders.splice(firstNonStarter, 0, rider);
       }
 
       await this.riderService.markAsStarter(rider.id);
 
-      // Fermer le sliding et attendre la fin de l'animation
-      this.closeAllSlidingItems();
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // Persist new order
+      await this.riderService.reorderRiders(this.riders);
     }
-
-    // Persist new order
-    await this.riderService.reorderRiders(this.riders);
   }
 
   /**
@@ -314,9 +312,9 @@ export class HomePage implements OnInit {
    * Ferme tous les éléments swipés ouverts avec animation.
    * Attend la fin de l'animation avant de résoudre.
    */
-  private async closeAllSlidingItems(): Promise<void> {
+  private async closeAllSlidingItems(interval = 100): Promise<void> {
     await this.list?.closeSlidingItems();
     // Attendre la fin de l'animation CSS de fermeture du slide
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, interval));
   }
 }
