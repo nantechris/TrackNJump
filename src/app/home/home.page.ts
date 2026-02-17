@@ -195,13 +195,6 @@ export class HomePage implements OnInit {
 
     const becomingNonStarter = !rider.isNonStarter;
 
-    // Fermer le sliding et attendre la fin de l'animation
-    // await this.closeAllSlidingItems();
-    // await new Promise((resolve) => setTimeout(resolve, 300));
-
-    // Remove from current position
-    // this.riders.splice(idx, 1);
-
     if (becomingNonStarter) {
       // Fermer le sliding et attendre la fin de l'animation
       await this.closeAllSlidingItems();

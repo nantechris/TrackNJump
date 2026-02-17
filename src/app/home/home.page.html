@@ -1,7 +1,10 @@
 <!-- En-tête de la page avec le titre de l'application et boutons d'action -->
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title> TrackNJump </ion-title>
+    <ion-title class="d-flex align-items-center justify-content-center text-center">
+      <img src="../../assets/icon/tracknjump.png" class="me-2" />
+      <span>TrackNJump</span>
+    </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="importRiders()">
         <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>

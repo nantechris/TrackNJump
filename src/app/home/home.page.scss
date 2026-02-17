@@ -12,7 +12,11 @@ ion-header {
   ion-title {
     font-size: 1.75em;
     font-weight: 700;
-    text-align: center;
+
+    img {
+      height: 50px;
+      width: auto;
+    }
   }
 }
 
