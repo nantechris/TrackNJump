@@ -129,6 +129,7 @@ ion-item-options {
   }
 
   ion-item-option.equal-width-option {
+    margin: 12px 0;
     width: 50px;
     max-width: 50px;
   }
@@ -138,6 +139,7 @@ ion-item-options {
   }
 
   ion-item-option.equal-width-option:last-child {
+    margin-right: 8px;
     border-radius: 0 10px 10px 0;
   }
 

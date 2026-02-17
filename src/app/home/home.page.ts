@@ -195,16 +195,30 @@ export class HomePage implements OnInit {
 
     const becomingNonStarter = !rider.isNonStarter;
 
+    // Fermer le sliding et attendre la fin de l'animation
+    // await this.closeAllSlidingItems();
+    // await new Promise((resolve) => setTimeout(resolve, 300));
+
     // Remove from current position
-    this.riders.splice(idx, 1);
+    // this.riders.splice(idx, 1);
 
     if (becomingNonStarter) {
+      // Fermer le sliding et attendre la fin de l'animation
+      await this.closeAllSlidingItems();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Remove from current position
+      this.riders.splice(idx, 1);
+
       // Mark as non-starter, clear passed status and move to end
       rider.isNonStarter = true;
       rider.hasPassed = false;
       this.riders.push(rider);
       await this.riderService.markAsNonStarter(rider.id);
     } else {
+      // Remove from current position
+      this.riders.splice(idx, 1);
+
       // Becoming starter: mark and insert at the end of starters (just before first non-starter)
       rider.isNonStarter = false;
 
@@ -217,11 +231,14 @@ export class HomePage implements OnInit {
       }
 
       await this.riderService.markAsStarter(rider.id);
+
+      // Fermer le sliding et attendre la fin de l'animation
+      this.closeAllSlidingItems();
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
-    // Persist new order and close slides
+    // Persist new order
     await this.riderService.reorderRiders(this.riders);
-    await this.closeAllSlidingItems();
   }
 
   /**
