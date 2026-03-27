@@ -5,6 +5,7 @@ import {
   Competition,
   CompetitionService,
 } from '../services/competition.service';
+import { Rider, RiderService } from '../services/rider.service';
 
 @Component({
   selector: 'app-home',
@@ -16,11 +17,13 @@ export class HomePage implements OnInit {
 
   constructor(
     private competitionService: CompetitionService,
+    private riderService: RiderService,
     private alertController: AlertController,
     private router: Router,
   ) {}
 
   async ngOnInit(): Promise<void> {
+    await this.ensureExampleData();
     await this.loadCompetitions();
   }
 
@@ -159,5 +162,71 @@ export class HomePage implements OnInit {
     }
 
     return `${year}-${month}-${day}`;
+  }
+
+  private async ensureExampleData(): Promise<void> {
+    const existingCompetitions =
+      await this.competitionService.getCompetitions();
+    if (existingCompetitions.length > 0) {
+      return;
+    }
+
+    const competition = await this.competitionService.createCompetition({
+      name: 'Saut Hermès 2025',
+      date: '05/07/2025',
+    });
+
+    const event = await this.competitionService.addEvent(competition.id, {
+      name: 'CSI 5*',
+    });
+
+    if (!event) {
+      return;
+    }
+
+    const sampleRiders: Omit<Rider, 'id'>[] = [
+      {
+        bib: 1,
+        name: 'Christian Ahlmann',
+        horse: 'Dominator 2000 Z',
+        isNonStarter: false,
+        hasPassed: false,
+        passedWithoutPhoto: false,
+      },
+      {
+        bib: 2,
+        name: 'Edwina Tops Alexander',
+        horse: 'Itot du Chateau',
+        isNonStarter: false,
+        hasPassed: false,
+        passedWithoutPhoto: false,
+      },
+      {
+        bib: 3,
+        name: 'Marcus Ehning',
+        horse: 'Comme Il Faut',
+        isNonStarter: false,
+        hasPassed: false,
+        passedWithoutPhoto: false,
+      },
+      {
+        bib: 4,
+        name: 'Judy-Ann Melchior',
+        horse: 'Levisto Z',
+        isNonStarter: false,
+        hasPassed: false,
+        passedWithoutPhoto: false,
+      },
+      {
+        bib: 5,
+        name: 'Nanté Andriamanga',
+        horse: 'Dunloughan Cruise',
+        isNonStarter: false,
+        hasPassed: false,
+        passedWithoutPhoto: false,
+      },
+    ];
+
+    await this.riderService.replaceAllRiders(sampleRiders, event.id);
   }
 }

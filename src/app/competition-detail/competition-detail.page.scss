@@ -82,9 +82,17 @@ ion-content {
   --background: #ffffff;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  --padding-start: 10px;
+  --padding-start: 6px;
   --inner-padding-end: 6px;
   --min-height: 62px;
+  --ion-safe-area-left: 0;
+}
+
+.event-item .icon-red {
+  color: #ef4444;
+  font-size: 1.4rem;
+  margin-left: 6px;
+  margin-right: 8px;
 }
 
 .event-item ion-label h3 {
