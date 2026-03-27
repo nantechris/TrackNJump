@@ -57,16 +57,25 @@ export class RiderService {
     await this.initPromise;
   }
 
+  private getScopedKey(eventId?: string): string {
+    return eventId ? `${this.STORAGE_KEY}:${eventId}` : this.STORAGE_KEY;
+  }
+
   /**
    * Récupère tous les cavaliers depuis le stockage.
    * @returns Liste des cavaliers triée (partants puis non-partants)
    */
-  async getRiders(): Promise<Rider[]> {
+  async getRiders(eventId?: string): Promise<Rider[]> {
     await this.ensureInit();
-    const riders = await this._storage?.get(this.STORAGE_KEY);
+    const storageKey = this.getScopedKey(eventId);
+    const riders = await this._storage?.get(storageKey);
 
     // Si aucune donnée n'existe, initialiser avec des données par défaut
     if (!riders || riders.length === 0) {
+      if (eventId) {
+        return [];
+      }
+
       const defaultRiders = this.getDefaultRiders();
       await this.saveRiders(defaultRiders);
       return defaultRiders;
@@ -135,10 +144,10 @@ export class RiderService {
    * Sauvegarde la liste des cavaliers dans le stockage.
    * @param riders - Liste des cavaliers à sauvegarder
    */
-  async saveRiders(riders: Rider[]): Promise<void> {
+  async saveRiders(riders: Rider[], eventId?: string): Promise<void> {
     await this.ensureInit();
     const sorted = this.sortRiders(riders);
-    await this._storage?.set(this.STORAGE_KEY, sorted);
+    await this._storage?.set(this.getScopedKey(eventId), sorted);
   }
 
   /**
@@ -146,8 +155,8 @@ export class RiderService {
    * @param rider - Cavalier à ajouter (sans ID)
    * @returns Le cavalier ajouté avec son ID généré
    */
-  async addRider(rider: Omit<Rider, 'id'>): Promise<Rider> {
-    const riders = await this.getRiders();
+  async addRider(rider: Omit<Rider, 'id'>, eventId?: string): Promise<Rider> {
+    const riders = await this.getRiders(eventId);
     const newRider: Rider = {
       ...rider,
       id: this.generateId(),
@@ -156,7 +165,7 @@ export class RiderService {
       passedWithoutPhoto: (rider as any).passedWithoutPhoto ?? false,
     };
     riders.push(newRider);
-    await this.saveRiders(riders);
+    await this.saveRiders(riders, eventId);
     return newRider;
   }
 
@@ -168,12 +177,13 @@ export class RiderService {
   async updateRider(
     id: string,
     updates: Partial<Omit<Rider, 'id'>>,
+    eventId?: string,
   ): Promise<void> {
-    const riders = await this.getRiders();
+    const riders = await this.getRiders(eventId);
     const index = riders.findIndex((r) => r.id === id);
     if (index !== -1) {
       riders[index] = { ...riders[index], ...updates };
-      await this.saveRiders(riders);
+      await this.saveRiders(riders, eventId);
     }
   }
 
@@ -181,45 +191,49 @@ export class RiderService {
    * Supprime un cavalier.
    * @param id - ID du cavalier à supprimer
    */
-  async deleteRider(id: string): Promise<void> {
-    const riders = await this.getRiders();
+  async deleteRider(id: string, eventId?: string): Promise<void> {
+    const riders = await this.getRiders(eventId);
     const filtered = riders.filter((r) => r.id !== id);
-    await this.saveRiders(filtered);
+    await this.saveRiders(filtered, eventId);
   }
 
   /**
    * Marque un cavalier comme non-partant et le déplace à la fin de la liste.
    * @param id - ID du cavalier
    */
-  async markAsNonStarter(id: string): Promise<void> {
-    await this.updateRider(id, {
-      isNonStarter: true,
-      hasPassed: false,
-      passedWithoutPhoto: false,
-    });
+  async markAsNonStarter(id: string, eventId?: string): Promise<void> {
+    await this.updateRider(
+      id,
+      {
+        isNonStarter: true,
+        hasPassed: false,
+        passedWithoutPhoto: false,
+      },
+      eventId,
+    );
   }
 
   /**
    * Restaure un cavalier non-partant en partant.
    * @param id - ID du cavalier
    */
-  async markAsStarter(id: string): Promise<void> {
-    await this.updateRider(id, { isNonStarter: false });
+  async markAsStarter(id: string, eventId?: string): Promise<void> {
+    await this.updateRider(id, { isNonStarter: false }, eventId);
   }
 
   /**
    * Bascule l'état "passé" d'un cavalier.
    * @param id - ID du cavalier
    */
-  async togglePassed(id: string): Promise<void> {
-    const riders = await this.getRiders();
+  async togglePassed(id: string, eventId?: string): Promise<void> {
+    const riders = await this.getRiders(eventId);
     const rider = riders.find((r) => r.id === id);
     if (rider) {
       rider.hasPassed = !rider.hasPassed;
       if (!rider.hasPassed) {
         rider.passedWithoutPhoto = false;
       }
-      await this.saveRiders(riders);
+      await this.saveRiders(riders, eventId);
     }
   }
 
@@ -227,8 +241,8 @@ export class RiderService {
    * Réordonne la liste des cavaliers.
    * @param riders - Nouvelle liste ordonnée
    */
-  async reorderRiders(riders: Rider[]): Promise<void> {
-    await this.saveRiders(riders);
+  async reorderRiders(riders: Rider[], eventId?: string): Promise<void> {
+    await this.saveRiders(riders, eventId);
   }
 
   /**
@@ -242,17 +256,20 @@ export class RiderService {
   /**
    * Supprime toutes les données.
    */
-  async clearAll(): Promise<void> {
+  async clearAll(eventId?: string): Promise<void> {
     await this.ensureInit();
-    await this._storage?.remove(this.STORAGE_KEY);
+    await this._storage?.remove(this.getScopedKey(eventId));
   }
 
   /**
    * Remplace tous les cavaliers par une nouvelle liste.
    * @param riders - Nouvelle liste de cavaliers (sans ID)
    */
-  async replaceAllRiders(riders: Omit<Rider, 'id'>[]): Promise<void> {
-    await this.clearAll();
+  async replaceAllRiders(
+    riders: Omit<Rider, 'id'>[],
+    eventId?: string,
+  ): Promise<void> {
+    await this.clearAll(eventId);
     const newRiders: Rider[] = riders.map((r) => ({
       ...r,
       id: this.generateId(),
@@ -260,6 +277,6 @@ export class RiderService {
       hasPassed: (r as any).hasPassed ?? false,
       passedWithoutPhoto: (r as any).passedWithoutPhoto ?? false,
     }));
-    await this.saveRiders(newRiders);
+    await this.saveRiders(newRiders, eventId);
   }
 }

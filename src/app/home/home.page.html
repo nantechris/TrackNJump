@@ -1,4 +1,3 @@
-<!-- En-tête de la page avec le titre de l'application et boutons d'action -->
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title
@@ -8,59 +7,65 @@
       <span>TrackNJump</span>
     </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="importRiders()">
-        <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>
-      </ion-button>
-      <ion-button (click)="addRider()">
+      <ion-button (click)="createCompetition()">
         <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<!-- Contenu principal -->
-<ion-content class="flex-container" [fullscreen]="true">
-  <!-- Liste vide -->
-  <div *ngIf="riders.length === 0" class="empty-state">
-    <ion-icon name="people-outline"></ion-icon>
-    <p>Aucun cavalier</p>
-    <p class="empty-hint">Ajoutez un cavalier ou importez une épreuve</p>
+<ion-content [fullscreen]="true">
+  <div class="page-title" *ngIf="competitions.length > 0">
+    <h2>Concours</h2>
   </div>
 
-  <!-- Liste des cavaliers -->
-  <ion-list *ngIf="riders.length > 0">
+  <div *ngIf="competitions.length === 0" class="empty-state">
+    <ion-icon name="trophy-outline"></ion-icon>
+    <p>Aucun concours</p>
+    <p class="empty-hint">Créez un concours pour gérer ses épreuves</p>
+    <ion-button (click)="createCompetition()">Créer un concours</ion-button>
+  </div>
+
+  <ion-list
+    *ngIf="competitions.length > 0"
+    lines="none"
+    class="competition-list"
+  >
     <ion-reorder-group
       [disabled]="false"
-      (ionItemReorder)="handleReorder($event)"
+      (ionItemReorder)="handleCompetitionReorder($event)"
     >
-      <ion-item-sliding *ngFor="let rider of riders; trackBy: trackByRiderId">
-        <app-rider-card
-          [rider]="rider"
-          [rightHanded]="rightHanded"
-          (passed)="togglePassed($event)"
-          (passedWithoutPhoto)="togglePassedWithoutPhoto($event)"
-          (nonStarter)="toggleNonStarter($event)"
-          (deleted)="deleteRider($event)"
-          (updated)="onRiderUpdated($event)"
-        ></app-rider-card>
+      <ion-item-sliding
+        *ngFor="let competition of competitions; trackBy: trackByCompetitionId"
+      >
+        <ion-item-options side="end">
+          <ion-item-option
+            color="primary"
+            (click)="editCompetition(competition)"
+          >
+            <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+          </ion-item-option>
+          <ion-item-option
+            color="danger"
+            (click)="deleteCompetition(competition)"
+          >
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+
+        <ion-item
+          button
+          detail="false"
+          class="competition-item"
+          (click)="openCompetition(competition)"
+        >
+          <ion-label>
+            <h2>{{ competition.name }}</h2>
+            <p>{{ competition.date }}</p>
+          </ion-label>
+          <ion-reorder slot="end"></ion-reorder>
+        </ion-item>
       </ion-item-sliding>
     </ion-reorder-group>
   </ion-list>
-
-  <!-- Bouton de latéralité -->
-  <div class="manual-preference-container">
-    <img
-      *ngIf="rightHanded; else leftHanded"
-      src="../../assets/icon/rightHanded.svg"
-      alt="rightHanded"
-      (click)="changeLiterality()"
-    />
-    <ng-template #leftHanded>
-      <img
-        src="../../assets/icon/leftHanded.svg"
-        alt="leftHanded"
-        (click)="changeLiterality()"
-      />
-    </ng-template>
-  </div>
 </ion-content>

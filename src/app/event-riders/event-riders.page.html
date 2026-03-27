@@ -1,0 +1,72 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button
+        [defaultHref]="competition ? '/home/competition/' + competition.id : '/home'"
+      ></ion-back-button>
+    </ion-buttons>
+    <ion-title
+      class="d-flex align-items-center justify-content-center text-center"
+    >
+      <img src="../../assets/icon/tracknjump.png" class="me-2" />
+      <span>TrackNJump</span>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="importRiders()" [disabled]="!event">
+        <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="addRider()" [disabled]="!event">
+        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="flex-container" [fullscreen]="true">
+  <div class="event-header" *ngIf="competition && event">
+    <h2>{{ competition.name }}</h2>
+    <p class="header-date">{{ competition.date }}</p>
+    <p class="header-event">Épreuve : {{ event.name }}</p>
+  </div>
+
+  <div *ngIf="riders.length === 0" class="empty-state">
+    <ion-icon name="people-outline"></ion-icon>
+    <p>Aucun cavalier</p>
+    <p class="empty-hint">Ajoutez un cavalier ou importez une épreuve</p>
+  </div>
+
+  <ion-list *ngIf="riders.length > 0">
+    <ion-reorder-group
+      [disabled]="false"
+      (ionItemReorder)="handleReorder($event)"
+    >
+      <ion-item-sliding *ngFor="let rider of riders; trackBy: trackByRiderId">
+        <app-rider-card
+          [rider]="rider"
+          [rightHanded]="rightHanded"
+          (passed)="togglePassed($event)"
+          (passedWithoutPhoto)="togglePassedWithoutPhoto($event)"
+          (nonStarter)="toggleNonStarter($event)"
+          (deleted)="deleteRider($event)"
+          (updated)="onRiderUpdated($event)"
+        ></app-rider-card>
+      </ion-item-sliding>
+    </ion-reorder-group>
+  </ion-list>
+
+  <div class="manual-preference-container">
+    <img
+      *ngIf="rightHanded; else leftHanded"
+      src="../../assets/icon/rightHanded.svg"
+      alt="rightHanded"
+      (click)="changeLiterality()"
+    />
+    <ng-template #leftHanded>
+      <img
+        src="../../assets/icon/leftHanded.svg"
+        alt="leftHanded"
+        (click)="changeLiterality()"
+      />
+    </ng-template>
+  </div>
+</ion-content>

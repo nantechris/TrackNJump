@@ -1,0 +1,75 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title
+      class="d-flex align-items-center justify-content-center text-center"
+    >
+      <img src="../../assets/icon/tracknjump.png" class="me-2" />
+      <span>TrackNJump</span>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="editCompetition()" [disabled]="!competition">
+        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="createEvent()" [disabled]="!competition">
+        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="competition-header" *ngIf="competition as c">
+    <h2>Épreuves</h2>
+    <p class="competition-name">{{ c.name }}</p>
+    <p>Date du concours : {{ c.date }}</p>
+  </div>
+
+  <div
+    *ngIf="competition && competition.events.length === 0"
+    class="empty-state"
+  >
+    <ion-icon name="list-outline"></ion-icon>
+    <p>Aucune épreuve</p>
+    <p class="empty-hint">Ajoutez la première épreuve du concours.</p>
+    <ion-button (click)="createEvent()">Ajouter une épreuve</ion-button>
+  </div>
+
+  <ion-list
+    *ngIf="competition && competition.events.length > 0"
+    lines="none"
+    class="event-list"
+  >
+    <ion-reorder-group
+      [disabled]="false"
+      (ionItemReorder)="handleEventReorder($event)"
+    >
+      <ion-item-sliding
+        *ngFor="let event of competition.events; trackBy: trackByEventId"
+      >
+        <ion-item-options side="end">
+          <ion-item-option color="primary" (click)="editEvent(event)">
+            <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+          </ion-item-option>
+          <ion-item-option color="danger" (click)="deleteEvent(event)">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+
+        <ion-item
+          button
+          detail="false"
+          class="event-item"
+          (click)="openEvent(event)"
+        >
+          <ion-label>
+            <h3>{{ event.name }}</h3>
+          </ion-label>
+          <ion-reorder slot="end"></ion-reorder>
+        </ion-item>
+      </ion-item-sliding>
+    </ion-reorder-group>
+  </ion-list>
+</ion-content>

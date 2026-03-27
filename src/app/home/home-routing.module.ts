@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { CompetitionDetailPage } from '../competition-detail/competition-detail.page';
+import { EventRidersPage } from '../event-riders/event-riders.page';
 import { HomePage } from './home.page';
 
 /**
@@ -11,6 +13,14 @@ const routes: Routes = [
   {
     path: '',
     component: HomePage,
+  },
+  {
+    path: 'competition/:id',
+    component: CompetitionDetailPage,
+  },
+  {
+    path: 'competition/:id/event/:eventId',
+    component: EventRidersPage,
   },
 ];
 
