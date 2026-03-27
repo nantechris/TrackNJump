@@ -110,6 +110,7 @@ export class HomePage implements OnInit {
                 horse: data.horse,
                 isNonStarter: false,
                 hasPassed: false,
+                passedWithoutPhoto: false,
               });
               await this.loadRiders();
             }
@@ -205,6 +206,7 @@ export class HomePage implements OnInit {
       // Mark as non-starter, clear passed status and move to end
       rider.isNonStarter = true;
       rider.hasPassed = false;
+      rider.passedWithoutPhoto = false;
       this.riders.push(rider);
       await this.riderService.markAsNonStarter(rider.id);
     } else {
@@ -268,6 +270,7 @@ export class HomePage implements OnInit {
       }
       const insertIndex = lastPassed + 1;
       rider.hasPassed = true;
+      rider.passedWithoutPhoto = false;
       this.riders.splice(insertIndex, 0, rider);
 
       // Persist new order and flags
@@ -275,7 +278,54 @@ export class HomePage implements OnInit {
     } else {
       // Unmarking passed: keep current order, just update flag
       rider.hasPassed = false;
-      await this.riderService.updateRider(rider.id, { hasPassed: false });
+      rider.passedWithoutPhoto = false;
+      await this.riderService.updateRider(rider.id, {
+        hasPassed: false,
+        passedWithoutPhoto: false,
+      });
+    }
+  }
+
+  /**
+   * Marque un cavalier comme "passé sans photo".
+   * Ne fait rien si le cavalier est non-partant.
+   */
+  async togglePassedWithoutPhoto(rider: Rider): Promise<void> {
+    if (rider.isNonStarter) {
+      await this.closeAllSlidingItems();
+      return;
+    }
+
+    const nowWithoutPhoto = !rider.passedWithoutPhoto;
+    await this.closeAllSlidingItems();
+
+    if (nowWithoutPhoto) {
+      rider.isNonStarter = false;
+
+      const idx = this.riders.indexOf(rider);
+      if (idx === -1) {
+        return;
+      }
+
+      this.riders.splice(idx, 1);
+
+      let lastPassed = -1;
+      for (let i = 0; i < this.riders.length; i++) {
+        if (this.riders[i].hasPassed) lastPassed = i;
+      }
+
+      rider.hasPassed = true;
+      rider.passedWithoutPhoto = true;
+      this.riders.splice(lastPassed + 1, 0, rider);
+
+      await this.riderService.reorderRiders(this.riders);
+    } else {
+      rider.hasPassed = false;
+      rider.passedWithoutPhoto = false;
+      await this.riderService.updateRider(rider.id, {
+        hasPassed: false,
+        passedWithoutPhoto: false,
+      });
     }
   }
 

@@ -10,6 +10,7 @@ import { Storage } from '@ionic/storage-angular';
  * @property horse - Nom du cheval monté par le cavalier
  * @property isNonStarter - Indique si le cavalier est non-partant
  * @property hasPassed - Indique si le cavalier est déjà passé
+ * @property passedWithoutPhoto - Indique si le cavalier est passé sans photo
  */
 export interface Rider {
   id: string;
@@ -18,6 +19,7 @@ export interface Rider {
   horse: string;
   isNonStarter: boolean;
   hasPassed: boolean;
+  passedWithoutPhoto: boolean;
 }
 
 /**
@@ -86,6 +88,7 @@ export class RiderService {
         horse: 'Dominator 2000 Z',
         isNonStarter: false,
         hasPassed: false,
+        passedWithoutPhoto: false,
       },
       {
         id: this.generateId(),
@@ -94,6 +97,7 @@ export class RiderService {
         horse: 'Itot du Chateau',
         isNonStarter: false,
         hasPassed: false,
+        passedWithoutPhoto: false,
       },
       {
         id: this.generateId(),
@@ -102,6 +106,7 @@ export class RiderService {
         horse: 'Comme Il Faut',
         isNonStarter: false,
         hasPassed: false,
+        passedWithoutPhoto: false,
       },
       {
         id: this.generateId(),
@@ -110,6 +115,7 @@ export class RiderService {
         horse: 'Levisto Z',
         isNonStarter: false,
         hasPassed: false,
+        passedWithoutPhoto: false,
       },
     ];
   }
@@ -147,6 +153,7 @@ export class RiderService {
       id: this.generateId(),
       isNonStarter: rider.isNonStarter ?? false,
       hasPassed: (rider as any).hasPassed ?? false,
+      passedWithoutPhoto: (rider as any).passedWithoutPhoto ?? false,
     };
     riders.push(newRider);
     await this.saveRiders(riders);
@@ -185,7 +192,11 @@ export class RiderService {
    * @param id - ID du cavalier
    */
   async markAsNonStarter(id: string): Promise<void> {
-    await this.updateRider(id, { isNonStarter: true, hasPassed: false });
+    await this.updateRider(id, {
+      isNonStarter: true,
+      hasPassed: false,
+      passedWithoutPhoto: false,
+    });
   }
 
   /**
@@ -205,6 +216,9 @@ export class RiderService {
     const rider = riders.find((r) => r.id === id);
     if (rider) {
       rider.hasPassed = !rider.hasPassed;
+      if (!rider.hasPassed) {
+        rider.passedWithoutPhoto = false;
+      }
       await this.saveRiders(riders);
     }
   }
@@ -244,6 +258,7 @@ export class RiderService {
       id: this.generateId(),
       isNonStarter: r.isNonStarter ?? false,
       hasPassed: (r as any).hasPassed ?? false,
+      passedWithoutPhoto: (r as any).passedWithoutPhoto ?? false,
     }));
     await this.saveRiders(newRiders);
   }

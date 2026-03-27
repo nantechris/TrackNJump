@@ -12,6 +12,14 @@
 <!-- Options de swipe à droite : Non-partant et Supprimer -->
 <ion-item-options side="end">
   <ion-item-option
+    *ngIf="!rider.isNonStarter && !rider.passedWithoutPhoto"
+    class="status-option equal-width-option"
+    [color]="rider.passedWithoutPhoto ? '' : 'secondary'"
+    (click)="onTogglePassedWithoutPhoto()"
+  >
+    SP
+  </ion-item-option>
+  <ion-item-option
     class="status-option equal-width-option"
     [color]="rider.isNonStarter ? 'success' : 'warning'"
     (click)="onToggleNonStarter()"
@@ -31,6 +39,7 @@
 <ion-item
   [class.non-starter]="rider.isNonStarter"
   [class.passed]="rider.hasPassed"
+  [class.passed-without-photo]="rider.passedWithoutPhoto"
 >
   <ion-label>
     <div class="bib-container">
@@ -64,6 +73,9 @@
         autocomplete="off"
         [readonly]="rider.isNonStarter"
       />
+      <span *ngIf="rider.passedWithoutPhoto" class="without-photo-badge">
+        Passé sans photo
+      </span>
     </div>
   </ion-label>
 

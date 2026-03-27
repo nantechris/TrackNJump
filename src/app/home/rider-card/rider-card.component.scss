@@ -31,6 +31,11 @@ ion-item {
     border-left: 6px solid #2dd36f;
   }
 
+  &.passed-without-photo {
+    background-color: #fff3cd !important;
+    border-left: 6px solid #ffc409;
+  }
+
   ion-label {
     display: flex;
     align-items: center;
@@ -97,6 +102,18 @@ ion-item {
         color: #666;
         text-overflow: ellipsis;
         overflow: hidden;
+      }
+
+      .without-photo-badge {
+        display: inline-block;
+        align-self: flex-start;
+        margin-top: 4px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: #fff8e1;
+        color: #8a6d00;
+        font-size: 0.72rem;
+        font-weight: 700;
       }
     }
   }

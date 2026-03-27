@@ -90,6 +90,7 @@ export class ImportEpreuveComponent {
               horse,
               isNonStarter: false,
               hasPassed: false,
+              passedWithoutPhoto: false,
             });
           }
         }
@@ -117,6 +118,7 @@ export class ImportEpreuveComponent {
               horse,
               isNonStarter: false,
               hasPassed: false,
+              passedWithoutPhoto: false,
             });
           }
         }

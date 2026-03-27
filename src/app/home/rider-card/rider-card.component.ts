@@ -22,6 +22,9 @@ export class RiderCardComponent {
   /** Émis quand le cavalier est marqué comme passé / non passé */
   @Output() passed = new EventEmitter<Rider>();
 
+  /** Émis quand le cavalier est marqué comme passé sans photo */
+  @Output() passedWithoutPhoto = new EventEmitter<Rider>();
+
   /** Émis quand le cavalier est marqué comme non-partant / partant */
   @Output() nonStarter = new EventEmitter<Rider>();
 
@@ -37,6 +40,10 @@ export class RiderCardComponent {
 
   onTogglePassed(): void {
     this.passed.emit(this.rider);
+  }
+
+  onTogglePassedWithoutPhoto(): void {
+    this.passedWithoutPhoto.emit(this.rider);
   }
 
   onToggleNonStarter(): void {
