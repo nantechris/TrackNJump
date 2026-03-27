@@ -96,6 +96,8 @@ Maintenez et glissez l'icône fer à cheval 🐴 pour déplacer un cavalier dans
 
 # Idées
 
-- Export de données pour pouvoir le partager
 - Gestion de plusieurs épreuves et concours
+- Export de données pour pouvoir le partager (PDF)
+- Marquer une épreuve/un concours passé(e)
+- Fonction de recherche sur les concours et les épreuves
 - API call à la FFE
