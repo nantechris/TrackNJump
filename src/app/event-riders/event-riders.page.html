@@ -13,6 +13,18 @@
       <span>TrackNJump</span>
     </ion-title>
     <ion-buttons slot="end">
+      <ion-button
+        (click)="exportRidersPdf()"
+        [disabled]="!event || riders.length === 0 || isExporting"
+      >
+        <ion-icon slot="icon-only" name="document-text-outline"></ion-icon>
+      </ion-button>
+      <ion-button
+        (click)="shareRidersPdf()"
+        [disabled]="!event || riders.length === 0 || isExporting"
+      >
+        <ion-icon slot="icon-only" name="share-social-outline"></ion-icon>
+      </ion-button>
       <ion-button (click)="importRiders()" [disabled]="!event">
         <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>
       </ion-button>

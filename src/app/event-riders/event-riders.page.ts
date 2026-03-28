@@ -1,11 +1,17 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Capacitor } from '@capacitor/core';
+import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import {
   AlertController,
   IonList,
   ItemReorderEventDetail,
   ModalController,
+  ToastController,
 } from '@ionic/angular';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import {
   ImportEpreuveComponent,
   ImportResult,
@@ -26,6 +32,7 @@ export class EventRidersPage implements OnInit {
   @ViewChild(IonList) list?: IonList;
 
   rightHanded = true;
+  isExporting = false;
   riders: Rider[] = [];
 
   competition: Competition | null = null;
@@ -39,6 +46,7 @@ export class EventRidersPage implements OnInit {
     private competitionService: CompetitionService,
     private alertController: AlertController,
     private modalController: ModalController,
+    private toastController: ToastController,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -313,6 +321,319 @@ export class EventRidersPage implements OnInit {
   ): Promise<void> {
     this.riders = event.detail.complete(this.riders);
     await this.riderService.reorderRiders(this.riders, this.eventId);
+  }
+
+  async exportRidersPdf(): Promise<void> {
+    await this.generateRidersPdf('download');
+  }
+
+  async shareRidersPdf(): Promise<void> {
+    await this.generateRidersPdf('share');
+  }
+
+  private async generateRidersPdf(mode: 'download' | 'share'): Promise<void> {
+    if (!this.event || !this.competition || this.riders.length === 0) {
+      await this.presentToast('Aucun cavalier à exporter.', 'warning');
+      return;
+    }
+
+    this.isExporting = true;
+
+    try {
+      const doc = await this.buildRidersPdf();
+      const fileName = this.buildPdfFileName();
+
+      if (Capacitor.isNativePlatform()) {
+        const fileUri = await this.savePdfToDevice(doc, fileName);
+
+        if (mode === 'share') {
+          await Share.share({
+            title: 'TrackNJump - Liste des cavaliers',
+            text: `Liste des cavaliers - ${this.event.name}`,
+            files: [fileUri],
+            dialogTitle: 'Partager via Mail ou WhatsApp',
+          });
+          return;
+        }
+
+        await this.presentToast('PDF exporté dans les documents.', 'success');
+        return;
+      }
+
+      if (mode === 'share') {
+        const blob = doc.output('blob');
+        const file = new File([blob], fileName, { type: 'application/pdf' });
+        const canShareFile =
+          typeof navigator !== 'undefined' &&
+          typeof navigator.canShare === 'function' &&
+          navigator.canShare({ files: [file] });
+
+        if (
+          typeof navigator !== 'undefined' &&
+          typeof navigator.share === 'function' &&
+          canShareFile
+        ) {
+          await navigator.share({
+            title: 'TrackNJump - Liste des cavaliers',
+            text: `Liste des cavaliers - ${this.event.name}`,
+            files: [file],
+          });
+          return;
+        }
+      }
+
+      doc.save(fileName);
+      await this.presentToast('PDF généré.', 'success');
+    } catch {
+      await this.presentToast(
+        "Une erreur est survenue pendant l'export PDF.",
+        'danger',
+      );
+    } finally {
+      this.isExporting = false;
+    }
+  }
+
+  private async buildRidersPdf(): Promise<jsPDF> {
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const headerHeight = 30;
+
+    doc.setFillColor(19, 37, 61);
+    doc.rect(0, 0, pageWidth, headerHeight, 'F');
+
+    const logoDataUrl = await this.getLogoDataUrl();
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+
+    const title = 'TrackNJump';
+    const titleWidth = doc.getTextWidth(title);
+    const logoSize = logoDataUrl ? 12 : 0;
+    const headerGap = logoDataUrl ? 4 : 0;
+    const groupWidth = logoSize + headerGap + titleWidth;
+    const groupStartX = (pageWidth - groupWidth) / 2;
+    const contentCenterY = headerHeight / 2;
+
+    if (logoDataUrl) {
+      doc.addImage(
+        logoDataUrl,
+        'PNG',
+        groupStartX,
+        contentCenterY - logoSize / 2,
+        logoSize,
+        logoSize,
+      );
+    }
+
+    doc.text(title, groupStartX + logoSize + headerGap, contentCenterY + 2.4);
+
+    doc.setTextColor(19, 37, 61);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text(this.competition?.name ?? '', 14, 40);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text(`Date : ${this.competition?.date ?? ''}`, 14, 46);
+    doc.text(`Épreuve : ${this.event?.name ?? ''}`, 14, 52);
+
+    const rows = this.riders.map((rider, index) => [
+      String(index + 1),
+      String(rider.bib),
+      rider.name,
+      rider.horse,
+      this.getRiderStatusCode(rider),
+    ]);
+
+    autoTable(doc, {
+      startY: 58,
+      head: [['#', 'Dossard', 'Cavalier', 'Cheval', 'Statut']],
+      body: rows,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [19, 37, 61],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        halign: 'left',
+      },
+      bodyStyles: {
+        textColor: [19, 37, 61],
+      },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        1: { cellWidth: 22 },
+        4: { cellWidth: 20, halign: 'center' },
+      },
+      margin: { left: 10, right: 10 },
+      styles: {
+        fontSize: 10,
+        cellPadding: 2.8,
+      },
+      didParseCell: (data) => {
+        if (data.section !== 'body') {
+          return;
+        }
+
+        const rider = this.riders[data.row.index];
+        if (!rider) {
+          return;
+        }
+
+        data.cell.styles.fillColor = [255, 255, 255];
+        data.cell.styles.textColor = [19, 37, 61];
+
+        if (data.column.index === 4) {
+          data.cell.styles.fontStyle = 'bold';
+        }
+
+        if (rider.isNonStarter) {
+          data.cell.styles.fillColor = [244, 244, 244];
+          data.cell.styles.textColor = [107, 114, 128];
+
+          if (data.column.index === 4) {
+            data.cell.styles.fillColor = [245, 158, 11];
+            data.cell.styles.textColor = [255, 255, 255];
+          }
+
+          return;
+        }
+
+        if (rider.passedWithoutPhoto) {
+          data.cell.styles.fillColor = [255, 243, 205];
+
+          if (data.column.index === 4) {
+            data.cell.styles.fillColor = [255, 196, 9];
+            data.cell.styles.textColor = [19, 37, 61];
+          }
+
+          return;
+        }
+
+        if (rider.hasPassed) {
+          data.cell.styles.fillColor = [212, 237, 218];
+
+          if (data.column.index === 4) {
+            data.cell.styles.fillColor = [45, 211, 111];
+            data.cell.styles.textColor = [255, 255, 255];
+          }
+        }
+      },
+    });
+
+    const finalY = (doc as any).lastAutoTable?.finalY ?? 58;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(70, 80, 95);
+    doc.text(
+      'Légende : NP = Non-partant | SP = Sans photo | P = Passé',
+      10,
+      finalY + 8,
+    );
+
+    return doc;
+  }
+
+  private getRiderStatusCode(rider: Rider): string {
+    if (rider.isNonStarter) {
+      return 'NP';
+    }
+
+    if (rider.passedWithoutPhoto) {
+      return 'SP';
+    }
+
+    if (rider.hasPassed) {
+      return 'P';
+    }
+
+    return '';
+  }
+
+  private async savePdfToDevice(doc: jsPDF, fileName: string): Promise<string> {
+    const dataUri = doc.output('datauristring');
+    const base64Data = dataUri.split(',')[1] ?? '';
+
+    const savedFile = await Filesystem.writeFile({
+      path: fileName,
+      data: base64Data,
+      directory: Directory.Documents,
+      recursive: true,
+    });
+
+    return savedFile.uri;
+  }
+
+  private buildPdfFileName(): string {
+    const now = new Date();
+    const dateFr = `${String(now.getDate()).padStart(2, '0')}-${String(
+      now.getMonth() + 1,
+    ).padStart(2, '0')}-${now.getFullYear()}`;
+    const eventName = this.sanitizeForFileName(this.event?.name ?? 'Epreuve');
+    const competitionName = this.sanitizeForFileName(
+      this.competition?.name ?? 'Concours',
+    );
+
+    return `TrackNJump_${eventName}_${competitionName}_${dateFr}.pdf`;
+  }
+
+  private sanitizeForFileName(value: string): string {
+    const normalized = value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9-\s_]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+
+    return normalized.length > 0 ? normalized : 'Epreuve';
+  }
+
+  private async getLogoDataUrl(): Promise<string | null> {
+    try {
+      const response = await fetch('assets/icon/tracknjump.png');
+      if (!response.ok) {
+        return null;
+      }
+
+      const blob = await response.blob();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result;
+          if (typeof result === 'string') {
+            resolve(result);
+            return;
+          }
+          reject(new Error('Logo invalide'));
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      });
+
+      return dataUrl;
+    } catch {
+      return null;
+    }
+  }
+
+  private async presentToast(
+    message: string,
+    color: 'success' | 'warning' | 'danger',
+  ): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      color,
+      duration: 1800,
+      position: 'bottom',
+    });
+
+    await toast.present();
   }
 
   private async closeAllSlidingItems(interval = 100): Promise<void> {
