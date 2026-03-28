@@ -1,0 +1,234 @@
+<ion-header>
+  <ion-toolbar class="help-toolbar">
+    <ion-title>Aide / Tutoriel</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding help-content">
+  <div class="welcome-banner">
+    <img
+      src="../../assets/icon/tracknjump.png"
+      alt="TrackNJump"
+      class="welcome-logo"
+    />
+    <h2>Bienvenue sur TrackNJump&nbsp;!</h2>
+    <p>
+      L'application de suivi de l'ordre de passage des cavaliers d'une épreuve.
+    </p>
+  </div>
+
+  <ion-card class="step-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="trophy-outline" class="step-icon"></ion-icon>
+        Étape 1 — Créer un concours
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>
+        Sur la page d'accueil, appuyez sur le bouton
+        <ion-icon
+          name="add-circle-outline"
+          style="vertical-align: middle"
+        ></ion-icon>
+        en haut à droite pour créer un nouveau concours.
+      </p>
+      <p>
+        Renseignez le <strong>nom</strong> et la <strong>date</strong> du
+        concours, puis validez.
+      </p>
+      <p>
+        Vous pouvez aussi <strong>modifier</strong>
+        <ion-icon
+          name="create-outline"
+          style="vertical-align: middle"
+        ></ion-icon>
+        ou <strong>supprimer</strong>
+        <ion-icon
+          name="trash-outline"
+          style="vertical-align: middle"
+        ></ion-icon>
+        un concours en glissant vers la gauche.
+      </p>
+      <p>
+        Vous pouvez aussi faire une
+        <strong>modification directe dans la liste</strong> : touchez
+        directement le <strong>nom</strong> ou la <strong>date</strong>
+        du concours dans la liste, puis validez en sortant du champ.
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="step-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="list-outline" class="step-icon"></ion-icon>
+        Étape 2 — Ajouter des épreuves
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Appuyez sur un concours pour ouvrir son détail.</p>
+      <p>
+        Créez ensuite une ou plusieurs <strong>épreuves</strong> (ex. : CSI 5*,
+        Amateur…) via le bouton
+        <ion-icon
+          name="add-circle-outline"
+          style="vertical-align: middle"
+        ></ion-icon
+        >.
+      </p>
+      <p>
+        Vous pouvez aussi <strong>modifier le concours</strong> avec le bouton
+        <ion-icon
+          name="create-outline"
+          style="vertical-align: middle"
+        ></ion-icon
+        >.
+      </p>
+      <p>
+        Dans la liste des épreuves, un <strong>badge compteur</strong> affiche
+        aussi le <strong>nombre d'engagés</strong> pour chaque épreuve (exemple
+        :
+        <ion-badge color="secondary" style="vertical-align: middle">5</ion-badge
+        >).
+      </p>
+      <p>
+        Le nom de l'épreuve est aussi modifiable en
+        <strong>modification directe dans la liste</strong>.
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="step-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="people-outline" class="step-icon"></ion-icon>
+        Étape 3 — Gérer les cavaliers
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>
+        Dans la liste des cavaliers, chaque fiche affiche le
+        <strong>numéro de dossard</strong>, le <strong>nom</strong> et le
+        <strong>cheval</strong>.
+      </p>
+      <ul>
+        <li>
+          Glissez vers la droite sur une fiche pour
+          <strong>marquer le cavalier comme passé</strong> (photo prise).
+        </li>
+        <li>
+          Glissez vers la gauche pour marquer <strong>SP</strong> (passé sans
+          photo).
+        </li>
+        <li>
+          Glissez vers la gauche aussi pour marquer <strong>NP</strong> (non
+          partant) ou <strong>supprimer</strong> le cavalier.
+        </li>
+      </ul>
+      <p class="action-row">
+        <ion-icon name="cloud-upload-outline" class="inline-icon"></ion-icon>
+        <strong>Importer</strong> une liste de cavaliers depuis un fichier
+        texte.
+      </p>
+      <p class="action-row">
+        <ion-icon name="add-circle-outline" class="inline-icon"></ion-icon>
+        <strong>Ajouter</strong> un cavalier manuellement.
+      </p>
+      <p class="action-row">
+        <ion-icon name="document-text-outline" class="inline-icon"></ion-icon>
+        <strong>Exporter</strong> la liste en PDF.
+      </p>
+      <p class="action-row">
+        <ion-icon name="share-social-outline" class="inline-icon"></ion-icon>
+        <strong>Partager</strong> la liste en PDF.
+      </p>
+      <p class="action-row">
+        <ion-icon name="sparkles" class="inline-icon"></ion-icon>
+        <strong>Réorganisation automatique</strong>
+      </p>
+      <p>
+        <strong>Réorganisation automatique :</strong> dès qu'un cavalier est
+        marqué <strong>passé</strong>, il se place automatiquement à la suite du
+        dernier cavalier déjà passé, même s'il n'était pas juste après dans la
+        liste.
+      </p>
+      <p>
+        De la même manière, les cavaliers marqués <strong>NP</strong> sont
+        déplacés automatiquement en fin de liste.
+      </p>
+      <p>
+        Les informations du cavalier sont aussi en
+        <strong>modification directe dans la liste</strong> : vous pouvez
+        modifier le <strong>dossard</strong>, le <strong>nom</strong> et le
+        <strong>cheval</strong> directement sur la fiche.
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="step-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="swap-vertical-outline" class="step-icon"></ion-icon>
+        Étape 4 — Réorganiser
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>
+        Maintenez appuyé et glissez pour réorganiser avec les icônes dédiées :
+      </p>
+      <p class="action-row">
+        <img
+          src="../../assets/icon/horseshoe.svg"
+          alt="Fer à cheval"
+          class="reorder-image-icon"
+        />
+        Pour les <strong>cavaliers</strong> : icône
+        <strong>fer à cheval</strong>.
+      </p>
+      <p class="action-row">
+        <ion-icon name="reorder-two-outline" class="inline-icon"></ion-icon>
+        Pour les <strong>épreuves</strong> et <strong>concours</strong> :
+        <strong>poignée de réorganisation</strong>.
+      </p>
+      <p>
+        La réorganisation des <strong>concours</strong> et
+        <strong>épreuves</strong> sert surtout à mieux
+        <strong>organiser votre affichage</strong>.
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="step-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="checkmark-done-outline" class="step-icon"></ion-icon>
+        Étape 5 — Marquer concours / épreuve comme passé
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>
+        Glissez vers la droite sur un <strong>concours</strong> ou une
+        <strong>épreuve</strong> dans la liste pour le/la marquer comme
+        <strong>passé(e)</strong> (affichage en vert).
+      </p>
+      <p>
+        Cette action sert surtout à mieux
+        <strong>suivre votre avancement visuel</strong> dans l'application.
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <div class="help-footer">
+    <ion-icon name="help-circle-outline"></ion-icon>
+    <span
+      >Appuyez sur <strong>Aide</strong> à tout moment pour revoir ce
+      tutoriel.</span
+    >
+  </div>
+</ion-content>

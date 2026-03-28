@@ -4,12 +4,14 @@ import {
   AlertController,
   IonList,
   ItemReorderEventDetail,
+  ModalController,
 } from '@ionic/angular';
 import {
   Competition,
   CompetitionService,
 } from '../services/competition.service';
 import { Rider, RiderService } from '../services/rider.service';
+import { HelpModalComponent } from './help-modal.component';
 
 @Component({
   selector: 'app-home',
@@ -26,6 +28,7 @@ export class HomePage implements OnInit {
     private riderService: RiderService,
     private alertController: AlertController,
     private router: Router,
+    private modalCtrl: ModalController,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -139,6 +142,15 @@ export class HomePage implements OnInit {
 
   openCompetition(competition: Competition): void {
     void this.router.navigate(['/competition', competition.id]);
+  }
+
+  async openHelp(): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: HelpModalComponent,
+      breakpoints: [0, 1],
+      initialBreakpoint: 1,
+    });
+    await modal.present();
   }
 
   onUpdateCompetition(
