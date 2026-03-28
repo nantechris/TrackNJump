@@ -6,6 +6,7 @@ import {
   CompetitionEvent,
   CompetitionService,
 } from '../services/competition.service';
+import { RiderService } from '../services/rider.service';
 
 @Component({
   selector: 'app-competition-detail',
@@ -14,12 +15,14 @@ import {
 })
 export class CompetitionDetailPage implements OnInit {
   competition: Competition | null = null;
+  riderCounts: Record<string, number> = {};
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private alertController: AlertController,
     private competitionService: CompetitionService,
+    private riderService: RiderService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -39,8 +42,12 @@ export class CompetitionDetailPage implements OnInit {
 
     this.competition = await this.competitionService.getCompetitionById(id);
     if (!this.competition) {
+      this.riderCounts = {};
       await this.router.navigate(['/']);
+      return;
     }
+
+    await this.loadRiderCounts();
   }
 
   async editCompetition(): Promise<void> {
@@ -225,6 +232,26 @@ export class CompetitionDetailPage implements OnInit {
       this.competition.id,
       this.competition.events,
     );
+  }
+
+  getRiderCount(eventId: string): number {
+    return this.riderCounts[eventId] ?? 0;
+  }
+
+  private async loadRiderCounts(): Promise<void> {
+    if (!this.competition) {
+      this.riderCounts = {};
+      return;
+    }
+
+    const counts = await Promise.all(
+      this.competition.events.map(async (event) => {
+        const riders = await this.riderService.getRiders(event.id);
+        return [event.id, riders.length] as const;
+      }),
+    );
+
+    this.riderCounts = Object.fromEntries(counts);
   }
 
   private toFrenchDate(inputDate: string): string {
