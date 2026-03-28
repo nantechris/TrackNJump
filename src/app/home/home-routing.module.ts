@@ -2,17 +2,17 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CompetitionDetailPage } from '../competition-detail/competition-detail.page';
 import { EventRidersPage } from '../event-riders/event-riders.page';
-import { HomePage } from './home.page';
+import { CompetitionsPage } from './home.page';
 
 /**
- * Routes internes du module HomePage.
+ * Routes internes du module CompetitionsPage.
  * Le chemin vide ('') correspond à la page d'accueil elle-même,
  * car ce module est chargé à la racine ('/') par le routeur principal.
  */
 const routes: Routes = [
   {
     path: '',
-    component: HomePage,
+    component: CompetitionsPage,
   },
   {
     path: 'competition/:id',
@@ -28,4 +28,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class HomePageRoutingModule {}
+export class CompetitionsPageRoutingModule {}

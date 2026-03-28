@@ -11,14 +11,19 @@ import {
   CompetitionService,
 } from '../services/competition.service';
 import { Rider, RiderService } from '../services/rider.service';
+import {
+  frenchDateToInputDate,
+  inputDateToFrenchDate,
+} from '../shared/utils/date.utils';
+import { closeSlidingItems } from '../shared/utils/sliding-items.utils';
 import { HelpModalComponent } from './help-modal.component';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-competitions',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
-export class HomePage implements OnInit {
+export class CompetitionsPage implements OnInit {
   @ViewChild(IonList) list?: IonList;
 
   competitions: Competition[] = [];
@@ -69,7 +74,7 @@ export class HomePage implements OnInit {
 
             await this.competitionService.createCompetition({
               name: data.name,
-              date: this.toFrenchDate(data.date),
+              date: inputDateToFrenchDate(data.date),
             });
             await this.loadCompetitions();
             return true;
@@ -94,7 +99,7 @@ export class HomePage implements OnInit {
         {
           name: 'date',
           type: 'date',
-          value: this.toInputDate(competition.date),
+          value: frenchDateToInputDate(competition.date),
         },
       ],
       buttons: [
@@ -108,7 +113,7 @@ export class HomePage implements OnInit {
 
             await this.competitionService.updateCompetition(competition.id, {
               name: data.name,
-              date: this.toFrenchDate(data.date),
+              date: inputDateToFrenchDate(data.date),
             });
             await this.loadCompetitions();
             return true;
@@ -156,13 +161,15 @@ export class HomePage implements OnInit {
   onUpdateCompetition(
     competition: Competition,
     field: 'name' | 'date',
-    event: any,
+    event: Event,
   ): void {
-    const newValue = (event.target as HTMLInputElement).value.trim();
+    const input = event.target as HTMLInputElement | null;
+    const newValue = input?.value.trim() ?? '';
 
     if (!newValue) {
-      event.target.value =
-        field === 'name' ? competition.name : competition.date;
+      if (input) {
+        input.value = field === 'name' ? competition.name : competition.date;
+      }
       return;
     }
 
@@ -190,34 +197,11 @@ export class HomePage implements OnInit {
   }
 
   async toggleCompetitionPassed(competition: Competition): Promise<void> {
-    await this.closeAllSlidingItems();
+    await closeSlidingItems(this.list);
     await this.competitionService.updateCompetition(competition.id, {
       hasPassed: !competition.hasPassed,
     });
     await this.loadCompetitions();
-  }
-
-  private async closeAllSlidingItems(interval = 100): Promise<void> {
-    await this.list?.closeSlidingItems();
-    await new Promise((resolve) => setTimeout(resolve, interval));
-  }
-
-  private toFrenchDate(inputDate: string): string {
-    const [year, month, day] = inputDate.split('-');
-    if (!year || !month || !day) {
-      return inputDate;
-    }
-
-    return `${day}/${month}/${year}`;
-  }
-
-  private toInputDate(frenchDate: string): string {
-    const [day, month, year] = frenchDate.split('/');
-    if (!day || !month || !year) {
-      return frenchDate;
-    }
-
-    return `${year}-${month}-${day}`;
   }
 
   private async ensureExampleData(): Promise<void> {

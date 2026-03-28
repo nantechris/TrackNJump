@@ -110,8 +110,16 @@ ion-content {
   border-radius: 50%;
   padding: 0;
   line-height: 1;
-  margin-right: 8px;
+  margin-right: 2px;
   text-align: center;
+}
+
+.event-item ion-badge[slot='end'] {
+  margin-inline-end: 0;
+}
+
+.event-item ion-reorder[slot='end'] {
+  margin-inline-start: 4px;
 }
 
 .event-item ion-label h3 {

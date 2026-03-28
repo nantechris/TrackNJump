@@ -11,6 +11,11 @@ import {
   CompetitionService,
 } from '../services/competition.service';
 import { RiderService } from '../services/rider.service';
+import {
+  frenchDateToInputDate,
+  inputDateToFrenchDate,
+} from '../shared/utils/date.utils';
+import { closeSlidingItems } from '../shared/utils/sliding-items.utils';
 
 @Component({
   selector: 'app-competition-detail',
@@ -73,7 +78,7 @@ export class CompetitionDetailPage implements OnInit {
         {
           name: 'date',
           type: 'date',
-          value: this.toInputDate(this.competition.date),
+          value: frenchDateToInputDate(this.competition.date),
         },
       ],
       buttons: [
@@ -89,7 +94,7 @@ export class CompetitionDetailPage implements OnInit {
               this.competition!.id,
               {
                 name: data.name,
-                date: this.toFrenchDate(data.date),
+                date: inputDateToFrenchDate(data.date),
               },
             );
             await this.loadCompetition();
@@ -201,15 +206,18 @@ export class CompetitionDetailPage implements OnInit {
     ]);
   }
 
-  onUpdateEvent(event: CompetitionEvent, eventObj: any): void {
+  onUpdateEvent(event: CompetitionEvent, eventObj: Event): void {
     if (!this.competition) {
       return;
     }
 
-    const newValue = (eventObj.target as HTMLInputElement).value.trim();
+    const input = eventObj.target as HTMLInputElement | null;
+    const newValue = input?.value.trim() ?? '';
 
     if (!newValue) {
-      eventObj.target.value = event.name;
+      if (input) {
+        input.value = event.name;
+      }
       return;
     }
 
@@ -245,17 +253,12 @@ export class CompetitionDetailPage implements OnInit {
       return;
     }
 
-    await this.closeAllSlidingItems();
+    await closeSlidingItems(this.list);
 
     await this.competitionService.updateEvent(this.competition.id, event.id, {
       hasPassed: !event.hasPassed,
     });
     await this.loadCompetition();
-  }
-
-  private async closeAllSlidingItems(interval = 100): Promise<void> {
-    await this.list?.closeSlidingItems();
-    await new Promise((resolve) => setTimeout(resolve, interval));
   }
 
   getRiderCount(eventId: string): number {
@@ -276,23 +279,5 @@ export class CompetitionDetailPage implements OnInit {
     );
 
     this.riderCounts = Object.fromEntries(counts);
-  }
-
-  private toFrenchDate(inputDate: string): string {
-    const [year, month, day] = inputDate.split('-');
-    if (!year || !month || !day) {
-      return inputDate;
-    }
-
-    return `${day}/${month}/${year}`;
-  }
-
-  private toInputDate(frenchDate: string): string {
-    const [day, month, year] = frenchDate.split('/');
-    if (!day || !month || !year) {
-      return frenchDate;
-    }
-
-    return `${year}-${month}-${day}`;
   }
 }

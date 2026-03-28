@@ -22,6 +22,7 @@ import {
   CompetitionService,
 } from '../services/competition.service';
 import { Rider, RiderService } from '../services/rider.service';
+import { closeSlidingItems } from '../shared/utils/sliding-items.utils';
 
 @Component({
   selector: 'app-event-riders',
@@ -162,13 +163,27 @@ export class EventRidersPage implements OnInit {
   async onRiderUpdated(data: {
     rider: Rider;
     field: 'bib' | 'name' | 'horse';
-    event: any;
+    event: Event;
   }): Promise<void> {
-    const value = data.event.target.value;
-    const updates: any = {};
+    const input = data.event.target as HTMLInputElement | null;
+    const value = input?.value?.trim() ?? '';
+    const updates: Partial<Pick<Rider, 'bib' | 'name' | 'horse'>> = {};
+
+    if (!value) {
+      if (input) {
+        input.value = String(data.rider[data.field]);
+      }
+      return;
+    }
 
     if (data.field === 'bib') {
       updates.bib = parseInt(value, 10);
+      if (Number.isNaN(updates.bib)) {
+        if (input) {
+          input.value = String(data.rider.bib);
+        }
+        return;
+      }
     } else {
       updates[data.field] = value;
     }
@@ -181,7 +196,7 @@ export class EventRidersPage implements OnInit {
   }
 
   async deleteRider(rider: Rider): Promise<void> {
-    await this.closeAllSlidingItems();
+    await closeSlidingItems(this.list);
     await this.riderService.deleteRider(rider.id, this.eventId);
     await this.loadRiders();
   }
@@ -189,14 +204,14 @@ export class EventRidersPage implements OnInit {
   async toggleNonStarter(rider: Rider): Promise<void> {
     const idx = this.riders.indexOf(rider);
     if (idx === -1) {
-      await this.closeAllSlidingItems();
+      await closeSlidingItems(this.list);
       return;
     }
 
     const becomingNonStarter = !rider.isNonStarter;
 
     if (becomingNonStarter) {
-      await this.closeAllSlidingItems(600);
+      await closeSlidingItems(this.list, 600);
 
       this.riders.splice(idx, 1);
 
@@ -212,9 +227,9 @@ export class EventRidersPage implements OnInit {
       const firstNonStarter = this.riders.findIndex((r) => r.isNonStarter);
       if (firstNonStarter === -1) {
         this.riders.push(rider);
-        await this.closeAllSlidingItems(0);
+        await closeSlidingItems(this.list, 0);
       } else {
-        await this.closeAllSlidingItems(0);
+        await closeSlidingItems(this.list, 0);
         this.riders.splice(firstNonStarter, 0, rider);
       }
 
@@ -225,12 +240,12 @@ export class EventRidersPage implements OnInit {
 
   async togglePassed(rider: Rider): Promise<void> {
     if (rider.isNonStarter) {
-      await this.closeAllSlidingItems();
+      await closeSlidingItems(this.list);
       return;
     }
 
     const nowPassed = !rider.hasPassed;
-    await this.closeAllSlidingItems();
+    await closeSlidingItems(this.list);
 
     if (nowPassed) {
       rider.isNonStarter = false;
@@ -269,12 +284,12 @@ export class EventRidersPage implements OnInit {
 
   async togglePassedWithoutPhoto(rider: Rider): Promise<void> {
     if (rider.isNonStarter) {
-      await this.closeAllSlidingItems();
+      await closeSlidingItems(this.list);
       return;
     }
 
     const nowWithoutPhoto = !rider.passedWithoutPhoto;
-    await this.closeAllSlidingItems();
+    await closeSlidingItems(this.list);
 
     if (nowWithoutPhoto) {
       rider.isNonStarter = false;
@@ -527,7 +542,12 @@ export class EventRidersPage implements OnInit {
       },
     });
 
-    const finalY = (doc as any).lastAutoTable?.finalY ?? 58;
+    const tableDoc = doc as jsPDF & {
+      lastAutoTable?: {
+        finalY?: number;
+      };
+    };
+    const finalY = tableDoc.lastAutoTable?.finalY ?? 58;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(70, 80, 95);
@@ -634,10 +654,5 @@ export class EventRidersPage implements OnInit {
     });
 
     await toast.present();
-  }
-
-  private async closeAllSlidingItems(interval = 100): Promise<void> {
-    await this.list?.closeSlidingItems();
-    await new Promise((resolve) => setTimeout(resolve, interval));
   }
 }

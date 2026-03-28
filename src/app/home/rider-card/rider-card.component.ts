@@ -35,7 +35,7 @@ export class RiderCardComponent {
   @Output() updated = new EventEmitter<{
     rider: Rider;
     field: 'bib' | 'name' | 'horse';
-    event: any;
+    event: Event;
   }>();
 
   onTogglePassed(): void {
@@ -54,7 +54,7 @@ export class RiderCardComponent {
     this.deleted.emit(this.rider);
   }
 
-  onUpdate(field: 'bib' | 'name' | 'horse', event: any): void {
+  onUpdate(field: 'bib' | 'name' | 'horse', event: Event): void {
     // Do not allow updates when the rider is marked non-starter
     if (this.rider && this.rider.isNonStarter) return;
     this.updated.emit({ rider: this.rider, field, event });

@@ -6,15 +6,20 @@ import { IonicModule } from '@ionic/angular';
 import { CompetitionDetailPage } from '../competition-detail/competition-detail.page';
 import { EventRidersPage } from '../event-riders/event-riders.page';
 import { HelpModalComponent } from './help-modal.component';
-import { HomePageRoutingModule } from './home-routing.module';
-import { HomePage } from './home.page';
+import { CompetitionsPageRoutingModule } from './home-routing.module';
+import { CompetitionsPage } from './home.page';
 import { ImportEpreuveComponent } from './import-epreuve/import-epreuve.component';
 import { RiderCardComponent } from './rider-card/rider-card.component';
 
 @NgModule({
-  imports: [CommonModule, FormsModule, IonicModule, HomePageRoutingModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonicModule,
+    CompetitionsPageRoutingModule,
+  ],
   declarations: [
-    HomePage,
+    CompetitionsPage,
     RiderCardComponent,
     ImportEpreuveComponent,
     CompetitionDetailPage,
@@ -22,4 +27,4 @@ import { RiderCardComponent } from './rider-card/rider-card.component';
     HelpModalComponent,
   ],
 })
-export class HomePageModule {}
+export class CompetitionsPageModule {}

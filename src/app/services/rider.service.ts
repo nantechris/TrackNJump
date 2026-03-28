@@ -161,8 +161,8 @@ export class RiderService {
       ...rider,
       id: this.generateId(),
       isNonStarter: rider.isNonStarter ?? false,
-      hasPassed: (rider as any).hasPassed ?? false,
-      passedWithoutPhoto: (rider as any).passedWithoutPhoto ?? false,
+      hasPassed: rider.hasPassed ?? false,
+      passedWithoutPhoto: rider.passedWithoutPhoto ?? false,
     };
     riders.push(newRider);
     await this.saveRiders(riders, eventId);
@@ -274,8 +274,8 @@ export class RiderService {
       ...r,
       id: this.generateId(),
       isNonStarter: r.isNonStarter ?? false,
-      hasPassed: (r as any).hasPassed ?? false,
-      passedWithoutPhoto: (r as any).passedWithoutPhoto ?? false,
+      hasPassed: r.hasPassed ?? false,
+      passedWithoutPhoto: r.passedWithoutPhoto ?? false,
     }));
     await this.saveRiders(newRiders, eventId);
   }
