@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
+      <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <ion-title
       class="d-flex align-items-center justify-content-center text-center"
@@ -61,12 +61,21 @@
         <ion-item
           button
           detail="false"
-          class="event-item"
+          [class.event-item]="true"
           (click)="openEvent(event)"
         >
           <ion-icon name="ribbon" slot="start" class="icon-red"></ion-icon>
           <ion-label>
-            <h3>{{ event.name }}</h3>
+            <div class="event-content">
+              <input
+                type="text"
+                class="event-name"
+                [value]="event.name"
+                (blur)="onUpdateEvent(event, $event)"
+                placeholder="Nom de l'épreuve"
+                (click)="$event.stopPropagation()"
+              />
+            </div>
           </ion-label>
           <ion-reorder slot="end"></ion-reorder>
         </ion-item>

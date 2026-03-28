@@ -56,7 +56,7 @@ export class EventRidersPage implements OnInit {
     const eventId = this.route.snapshot.paramMap.get('eventId');
 
     if (!competitionId || !eventId) {
-      await this.router.navigate(['/home']);
+      await this.router.navigate(['/']);
       return;
     }
 
@@ -65,7 +65,7 @@ export class EventRidersPage implements OnInit {
     const event = competition?.events.find((e) => e.id === eventId) ?? null;
 
     if (!competition || !event) {
-      await this.router.navigate(['/home']);
+      await this.router.navigate(['/']);
       return;
     }
 

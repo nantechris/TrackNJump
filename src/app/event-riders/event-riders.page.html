@@ -2,7 +2,8 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button
-        [defaultHref]="competition ? '/home/competition/' + competition.id : '/home'"
+        [defaultHref]="competition ? '/competition/' + competition.id : '/'"
+        text=""
       ></ion-back-button>
     </ion-buttons>
     <ion-title

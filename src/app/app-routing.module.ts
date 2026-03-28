@@ -8,19 +8,18 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
  * via `loadChildren`. Cela permet de ne charger le module HomePage que lorsque
  * l'utilisateur accède à la route correspondante, améliorant ainsi les performances.
  *
- * - Le chemin vide ('') redirige vers '/home'
- * - Le chemin 'home' charge le module HomePageModule en lazy-loading
- * - Toute autre route ('**') redirige vers '/home'
+ * - Le chemin vide ('') charge le module HomePageModule en lazy-loading
+ * - Toute autre route ('**') redirige vers '/'
  */
 const routes: Routes = [
   {
-    path: 'home',
+    path: '',
     loadChildren: () =>
       import('./home/home.module').then((m) => m.HomePageModule),
   },
   {
-    path: '',
-    redirectTo: 'home',
+    path: '**',
+    redirectTo: '',
     pathMatch: 'full',
   },
 ];

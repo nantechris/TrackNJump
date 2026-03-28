@@ -7,7 +7,7 @@ import { HomePage } from './home.page';
 /**
  * Routes internes du module HomePage.
  * Le chemin vide ('') correspond à la page d'accueil elle-même,
- * car ce module est déjà chargé sous la route '/home' par le routeur principal.
+ * car ce module est chargé à la racine ('/') par le routeur principal.
  */
 const routes: Routes = [
   {

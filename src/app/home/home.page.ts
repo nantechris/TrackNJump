@@ -132,7 +132,32 @@ export class HomePage implements OnInit {
   }
 
   openCompetition(competition: Competition): void {
-    void this.router.navigate(['/home/competition', competition.id]);
+    void this.router.navigate(['/competition', competition.id]);
+  }
+
+  onUpdateCompetition(
+    competition: Competition,
+    field: 'name' | 'date',
+    event: any,
+  ): void {
+    const newValue = (event.target as HTMLInputElement).value.trim();
+
+    if (!newValue) {
+      event.target.value =
+        field === 'name' ? competition.name : competition.date;
+      return;
+    }
+
+    if (newValue === (field === 'name' ? competition.name : competition.date)) {
+      return;
+    }
+
+    void this.competitionService
+      .updateCompetition(competition.id, {
+        ...(field === 'name' && { name: newValue }),
+        ...(field === 'date' && { date: newValue }),
+      })
+      .then(() => this.loadCompetitions());
   }
 
   trackByCompetitionId(_index: number, competition: Competition): string {

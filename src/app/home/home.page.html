@@ -56,13 +56,29 @@
         <ion-item
           button
           detail="false"
-          class="competition-item"
+          [class.competition-item]="true"
           (click)="openCompetition(competition)"
         >
           <ion-icon name="trophy" slot="start" class="icon-gold"></ion-icon>
           <ion-label>
-            <h2>{{ competition.name }}</h2>
-            <p>{{ competition.date }}</p>
+            <div class="competition-content">
+              <input
+                type="text"
+                class="competition-name"
+                [value]="competition.name"
+                (blur)="onUpdateCompetition(competition, 'name', $event)"
+                placeholder="Nom du concours"
+                (click)="$event.stopPropagation()"
+              />
+              <input
+                type="text"
+                class="competition-date"
+                [value]="competition.date"
+                (blur)="onUpdateCompetition(competition, 'date', $event)"
+                placeholder="Date"
+                (click)="$event.stopPropagation()"
+              />
+            </div>
           </ion-label>
           <ion-reorder slot="end"></ion-reorder>
         </ion-item>

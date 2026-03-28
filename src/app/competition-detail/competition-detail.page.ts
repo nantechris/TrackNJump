@@ -33,13 +33,13 @@ export class CompetitionDetailPage implements OnInit {
   async loadCompetition(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      await this.router.navigate(['/home']);
+      await this.router.navigate(['/']);
       return;
     }
 
     this.competition = await this.competitionService.getCompetitionById(id);
     if (!this.competition) {
-      await this.router.navigate(['/home']);
+      await this.router.navigate(['/']);
     }
   }
 
@@ -181,11 +181,32 @@ export class CompetitionDetailPage implements OnInit {
     }
 
     void this.router.navigate([
-      '/home/competition',
+      '/competition',
       this.competition.id,
       'event',
       event.id,
     ]);
+  }
+
+  onUpdateEvent(event: CompetitionEvent, eventObj: any): void {
+    if (!this.competition) {
+      return;
+    }
+
+    const newValue = (eventObj.target as HTMLInputElement).value.trim();
+
+    if (!newValue) {
+      eventObj.target.value = event.name;
+      return;
+    }
+
+    if (newValue === event.name) {
+      return;
+    }
+
+    void this.competitionService
+      .updateEvent(this.competition.id, event.id, { name: newValue })
+      .then(() => this.loadCompetition());
   }
 
   trackByEventId(_index: number, event: CompetitionEvent): string {
