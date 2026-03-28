@@ -1,6 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController, ItemReorderEventDetail } from '@ionic/angular';
+import {
+  AlertController,
+  IonList,
+  ItemReorderEventDetail,
+} from '@ionic/angular';
 import {
   Competition,
   CompetitionEvent,
@@ -14,6 +18,8 @@ import { RiderService } from '../services/rider.service';
   styleUrls: ['./competition-detail.page.scss'],
 })
 export class CompetitionDetailPage implements OnInit {
+  @ViewChild(IonList) list?: IonList;
+
   competition: Competition | null = null;
   riderCounts: Record<string, number> = {};
 
@@ -232,6 +238,24 @@ export class CompetitionDetailPage implements OnInit {
       this.competition.id,
       this.competition.events,
     );
+  }
+
+  async toggleEventPassed(event: CompetitionEvent): Promise<void> {
+    if (!this.competition) {
+      return;
+    }
+
+    await this.closeAllSlidingItems();
+
+    await this.competitionService.updateEvent(this.competition.id, event.id, {
+      hasPassed: !event.hasPassed,
+    });
+    await this.loadCompetition();
+  }
+
+  private async closeAllSlidingItems(interval = 100): Promise<void> {
+    await this.list?.closeSlidingItems();
+    await new Promise((resolve) => setTimeout(resolve, interval));
   }
 
   getRiderCount(eventId: string): number {

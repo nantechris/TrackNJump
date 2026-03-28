@@ -1,6 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, ItemReorderEventDetail } from '@ionic/angular';
+import {
+  AlertController,
+  IonList,
+  ItemReorderEventDetail,
+} from '@ionic/angular';
 import {
   Competition,
   CompetitionService,
@@ -13,6 +17,8 @@ import { Rider, RiderService } from '../services/rider.service';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
+  @ViewChild(IonList) list?: IonList;
+
   competitions: Competition[] = [];
 
   constructor(
@@ -169,6 +175,19 @@ export class HomePage implements OnInit {
   ): Promise<void> {
     this.competitions = event.detail.complete(this.competitions);
     await this.competitionService.reorderCompetitions(this.competitions);
+  }
+
+  async toggleCompetitionPassed(competition: Competition): Promise<void> {
+    await this.closeAllSlidingItems();
+    await this.competitionService.updateCompetition(competition.id, {
+      hasPassed: !competition.hasPassed,
+    });
+    await this.loadCompetitions();
+  }
+
+  private async closeAllSlidingItems(interval = 100): Promise<void> {
+    await this.list?.closeSlidingItems();
+    await new Promise((resolve) => setTimeout(resolve, interval));
   }
 
   private toFrenchDate(inputDate: string): string {

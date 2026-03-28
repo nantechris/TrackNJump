@@ -49,6 +49,14 @@
       <ion-item-sliding
         *ngFor="let event of competition.events; trackBy: trackByEventId"
       >
+        <ion-item-options
+          side="start"
+          class="stealth-start"
+          (ionSwipe)="toggleEventPassed(event)"
+        >
+          <ion-item-option class="stealth-option" expandable> </ion-item-option>
+        </ion-item-options>
+
         <ion-item-options side="end">
           <ion-item-option color="primary" (click)="editEvent(event)">
             <ion-icon slot="icon-only" name="create-outline"></ion-icon>
@@ -62,6 +70,7 @@
           button
           detail="false"
           [class.event-item]="true"
+          [class.passed]="event.hasPassed"
           (click)="openEvent(event)"
         >
           <ion-icon name="ribbon" slot="start" class="icon-red"></ion-icon>

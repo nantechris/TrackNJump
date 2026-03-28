@@ -88,6 +88,10 @@ ion-content {
   --ion-safe-area-left: 0;
 }
 
+.event-item.passed {
+  border-left: 6px solid #2dd36f;
+}
+
 .event-item .icon-red {
   color: #ef4444;
   font-size: 1.4rem;
@@ -130,6 +134,19 @@ ion-content {
 .event-list ion-item-options ion-item-option:last-child {
   margin-right: 4px;
   border-radius: 0 10px 10px 0;
+}
+
+.stealth-start {
+  --background: transparent;
+  background: transparent !important;
+}
+
+.stealth-option {
+  --background: transparent !important;
+  --color: transparent !important;
+  background: transparent !important;
+  color: transparent !important;
+  min-width: 0;
 }
 
 .event-content {

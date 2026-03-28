@@ -4,12 +4,14 @@ import { Storage } from '@ionic/storage-angular';
 export interface CompetitionEvent {
   id: string;
   name: string;
+  hasPassed: boolean;
 }
 
 export interface Competition {
   id: string;
   name: string;
   date: string;
+  hasPassed: boolean;
   events: CompetitionEvent[];
 }
 
@@ -42,9 +44,11 @@ export class CompetitionService {
     const normalized = (competitions ?? []).map((competition) => ({
       ...competition,
       date: this.normalizeFrenchDate(competition.date),
+      hasPassed: !!competition.hasPassed,
       events: (competition.events ?? []).map((event) => ({
         id: event.id,
         name: event.name,
+        hasPassed: !!event.hasPassed,
       })),
     }));
 
@@ -66,6 +70,7 @@ export class CompetitionService {
       id: this.generateId(),
       name: data.name.trim(),
       date: this.normalizeFrenchDate(data.date),
+      hasPassed: false,
       events: [],
     };
 
@@ -76,7 +81,7 @@ export class CompetitionService {
 
   async updateCompetition(
     competitionId: string,
-    updates: Partial<Pick<Competition, 'name' | 'date'>>,
+    updates: Partial<Pick<Competition, 'name' | 'date' | 'hasPassed'>>,
   ): Promise<void> {
     const competitions = await this.getCompetitions();
     const index = competitions.findIndex((c) => c.id === competitionId);
@@ -123,6 +128,7 @@ export class CompetitionService {
     const event: CompetitionEvent = {
       id: this.generateId(),
       name: data.name.trim(),
+      hasPassed: false,
     };
 
     competition.events.push(event);
@@ -133,7 +139,7 @@ export class CompetitionService {
   async updateEvent(
     competitionId: string,
     eventId: string,
-    updates: Partial<Pick<CompetitionEvent, 'name'>>,
+    updates: Partial<Pick<CompetitionEvent, 'name' | 'hasPassed'>>,
   ): Promise<void> {
     const competitions = await this.getCompetitions();
     const competition = competitions.find((c) => c.id === competitionId);
@@ -180,6 +186,7 @@ export class CompetitionService {
     competition.events = events.map((event) => ({
       id: event.id,
       name: event.name,
+      hasPassed: !!event.hasPassed,
     }));
 
     await this.saveCompetitions(competitions);

@@ -38,6 +38,14 @@
       <ion-item-sliding
         *ngFor="let competition of competitions; trackBy: trackByCompetitionId"
       >
+        <ion-item-options
+          side="start"
+          class="stealth-start"
+          (ionSwipe)="toggleCompetitionPassed(competition)"
+        >
+          <ion-item-option class="stealth-option" expandable> </ion-item-option>
+        </ion-item-options>
+
         <ion-item-options side="end">
           <ion-item-option
             color="primary"
@@ -57,6 +65,7 @@
           button
           detail="false"
           [class.competition-item]="true"
+          [class.passed]="competition.hasPassed"
           (click)="openCompetition(competition)"
         >
           <ion-icon name="trophy" slot="start" class="icon-gold"></ion-icon>

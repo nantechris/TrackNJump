@@ -78,6 +78,10 @@ ion-content {
   --ion-safe-area-left: 0;
 }
 
+.competition-item.passed {
+  border-left: 6px solid #2dd36f;
+}
+
 .competition-item .icon-gold {
   color: #fbbf24;
   font-size: 1.8rem;
@@ -111,6 +115,19 @@ ion-content {
 .competition-list ion-item-options ion-item-option:last-child {
   margin-right: 4px;
   border-radius: 0 10px 10px 0;
+}
+
+.stealth-start {
+  --background: transparent;
+  background: transparent !important;
+}
+
+.stealth-option {
+  --background: transparent !important;
+  --color: transparent !important;
+  background: transparent !important;
+  color: transparent !important;
+  min-width: 0;
 }
 
 .competition-content {
